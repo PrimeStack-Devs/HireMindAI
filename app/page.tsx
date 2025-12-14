@@ -85,7 +85,7 @@ export default function HomePage() {
           <h2
             className={`text-4xl font-extrabold mb-4 bg-gradient-to-r ${TEXT_GRADIENT} bg-clip-text text-transparent`}
           >
-            Why NeuraView?
+            Why HireMind?
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto mb-16 text-lg">
             Experience intelligent interview coaching powered by AI — designed
@@ -154,7 +154,7 @@ export default function HomePage() {
             How It Works
           </h2>
           <p className="text-gray-300 text-center max-w-2xl mx-auto mb-16 text-lg">
-            NeuraView transforms your preparation into measurable growth — from
+            HireMind transforms your preparation into measurable growth — from
             interview setup to AI-driven analysis.
           </p>
 
@@ -218,7 +218,7 @@ export default function HomePage() {
             Ready to face your next interview with confidence?
           </h2>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto text-lg">
-            Start practicing with NeuraView today and transform your preparation
+            Start practicing with HireMind today and transform your preparation
             into performance.
           </p>
           <Link

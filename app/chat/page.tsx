@@ -368,7 +368,7 @@ const AIChat = memo(() => {
                     <div className="flex items-center gap-3">
                       <LoadingDots size="md" />
                       <span className="text-sm text-slate-700 dark:text-slate-200 font-medium">
-                        Neura is thinking...
+                        Hire is thinking...
                       </span>
                     </div>
                   </div>

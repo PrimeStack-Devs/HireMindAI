@@ -37,7 +37,7 @@ const Navbar = () => {
             <div className="w-2 h-2 rounded-full bg-white opacity-50"></div>
           </div>
           <span className="text-lg font-bold tracking-tight bg-white bg-clip-text text-transparent">
-            NeuraView.AI
+            HireMind.AI
           </span>
         </Link>
 

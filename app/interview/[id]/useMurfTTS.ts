@@ -70,7 +70,7 @@ export function useMurfTTS(options?: UseMurfTTSOptions) {
           method: "POST",
           headers: {
             // move your API key to env/secure location in production
-            "api-key": "ap2_fdf1c778-42f0-4b14-84f9-fe9afa7aeb72",
+            "api-key": process.env.NEXT_PUBLIC_MURF_API_KEY || "",
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

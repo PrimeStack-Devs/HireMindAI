@@ -103,6 +103,66 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     );
   }
 
+  // const handleInterviewTermination = async (reason: string, feedback?: string) => {
+  //   toast.error(reason);
+  //   setIsInterviewCompleted(true);
+  //   await generateReport(feedback);
+  // };
+  const handleInterviewTermination = async (reason: string) => {
+    toast.error(reason);
+
+    // LOCK IMMEDIATELY
+    setIsInterviewCompleted(true);
+    setShowStartModal(false);
+
+    // optional small delay for UX
+    setTimeout(async () => {
+       router.push("/");
+      // await generateReport();
+    }, 500);
+  };
+
+
+
+  const generateReport = async () => {
+    setIsGeneratingReport(true);
+    try {
+      let feed = "";
+      if (stopAnalyticts) {
+        feed = stopAnalyticts();
+      }
+      await strapi.update("interviews", params.id, {
+        conversation: messages,
+      });
+      const res = await fetch("/api/interview/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages,
+          interviewDetails,
+          faceMeshFeedback: feed,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to generate report");
+
+      const report = await res.json();
+      // const report = data?.report;
+      if (report) {
+        await strapi.update("interviews", params.id, {
+          report: JSON.stringify(report),
+        });
+      }
+      toast.success("Report generated!");
+      router.push("/reports");
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not generate report");
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  }
+
+
   return (
     <main className="grid  min-h-[80vh] grid-rows-[auto_1fr] relative">
       {/* Start Modal */}
@@ -130,10 +190,19 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
         {/* Left: Full-height user video */}
         <section className="order-2 md:order-1 md:col-span-8">
           <Card className="m-4 h-[calc(100vh-120px)] overflow-hidden p-0 md:m-6">
-            <VideoPreview
-              startFn={setStartAnalyticts}
-              stopFn={setStopAnalyticts}
-            />
+            {!isInterviewCompleted ? (
+              <VideoPreview
+                startFn={setStartAnalyticts}
+                stopFn={setStopAnalyticts}
+                onTerminate={handleInterviewTermination}
+              />
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+                <h2 className="mb-4 text-2xl font-bold">Interview Terminated</h2>
+                {/* <p className="mb-6">Thank you for completing the interview.</p> */}
+              </div>
+            )
+            }
           </Card>
         </section>
 
@@ -166,43 +235,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
                 />
               ) : (
                 <Button
-                  onClick={async () => {
-                    setIsGeneratingReport(true);
-                    try {
-                      let feed = "";
-                      if (stopAnalyticts) {
-                        feed = stopAnalyticts();
-                      }
-                      await strapi.update("interviews", params.id, {
-                        conversation: messages,
-                      });
-                      const res = await fetch("/api/interview/report", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          messages,
-                          interviewDetails,
-                          faceMeshFeedback: feed,
-                        }),
-                      });
-                      if (!res.ok) throw new Error("Failed to generate report");
-
-                      const report = await res.json();
-                      // const report = data?.report;
-                      if (report) {
-                        await strapi.update("interviews", params.id, {
-                          report: JSON.stringify(report),
-                        });
-                      }
-                      toast.success("Report generated!");
-                      router.push("/reports");
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Could not generate report");
-                    } finally {
-                      setIsGeneratingReport(false);
-                    }
-                  }}
+                  onClick={generateReport}
                   disabled={isGeneratingReport}
                   className="w-full flex items-center justify-center gap-2"
                 >

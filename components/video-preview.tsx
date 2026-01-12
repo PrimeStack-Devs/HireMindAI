@@ -110,39 +110,6 @@ export default function EmotionAnalyzerPage({ startFn, stopFn, onTerminate }: an
     onTerminate?.(reason);
   };
 
-  // const terminateInterview = () => {
-  //   console.warn("Interview terminated due to multiple faces");
-
-  //   toast.error("Interview terminated due to multiple faces.", {
-  //     duration: 4000,
-  //   });
-
-  //   // stop camera safely
-  //   try {
-  //     cameraRef.current?.stop();
-  //     const stream = videoRef.current?.srcObject as MediaStream | null;
-  //     stream?.getTracks().forEach((t) => t.stop());
-  //     if (videoRef.current) videoRef.current.srcObject = null;
-  //   } catch { }
-
-  //   setRunning(false);
-
-  //   // optional: mark session invalid
-  //   sessionDataRef.current.push({
-  //     timestamp: Date.now(),
-  //     confidence: 0,
-  //     happy: 0,
-  //     sad: 0,
-  //     nervous: 1,
-  //     surprised: 0,
-  //     blink: 0,
-  //   });
-
-  //   // IMPORTANT: expose stop to parent if needed
-  //   // parent can redirect / lock report generation
-  // };
-
-
 
   // ------------------- On Results -------------------
   const onResults = (results: any) => {

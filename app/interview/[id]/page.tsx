@@ -103,20 +103,19 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // const handleInterviewTermination = async (reason: string, feedback?: string) => {
-  //   toast.error(reason);
-  //   setIsInterviewCompleted(true);
-  //   await generateReport(feedback);
-  // };
   const handleInterviewTermination = async (reason: string) => {
     toast.error(reason);
 
     // LOCK IMMEDIATELY
     setIsInterviewCompleted(true);
     setShowStartModal(false);
-    if (stopAnalyticts) {
-      stopAnalyticts();
+
+    if (stopAnalyticts && typeof stopAnalyticts === "function") {
+      try {
+        stopAnalyticts();
+      } catch { }
     }
+
     // optional small delay for UX
     setTimeout(async () => {
       router.push("/");

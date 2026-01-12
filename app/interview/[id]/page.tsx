@@ -114,10 +114,12 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     // LOCK IMMEDIATELY
     setIsInterviewCompleted(true);
     setShowStartModal(false);
-
+    if (stopAnalyticts) {
+      stopAnalyticts();
+    }
     // optional small delay for UX
     setTimeout(async () => {
-       router.push("/");
+      router.push("/");
       // await generateReport();
     }, 500);
   };

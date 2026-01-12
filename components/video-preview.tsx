@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import MetricsPanel from "@/components/MetricsPanel";
+import toast from "react-hot-toast";
 
 interface EmotionData {
   timestamp: number;
@@ -14,7 +15,11 @@ interface EmotionData {
   blink: number;
 }
 
-export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
+export default function EmotionAnalyzerPage({ startFn, stopFn, onTerminate }: any) {
+  const multiFaceFramesRef = useRef(0);
+  const terminatedRef = useRef(false);
+  const warningShownRef = useRef(false);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraRef = useRef<any>(null);
@@ -80,6 +85,65 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
     return { yaw: nose.x - centerX, pitch: nose.y - centerY };
   };
 
+  const terminateInterview = () => {
+    console.log("terminateInterview called");
+    if (terminatedRef.current) return;
+    if (faceMeshRef.current) {
+      faceMeshRef.current.onResults(() => { }); // detach callback
+    }
+    terminatedRef.current = true;
+    console.warn("Interview terminated due to multiple faces");
+
+    const reason = "Interview terminated due to multiple faces detected.";
+
+    // Stop camera safely
+    try {
+      cameraRef.current?.stop();
+      const stream = videoRef.current?.srcObject as MediaStream | null;
+      stream?.getTracks().forEach((t) => t.stop());
+      if (videoRef.current) videoRef.current.srcObject = null;
+    } catch { }
+
+    setRunning(false);
+
+    // Call parent
+    onTerminate?.(reason);
+  };
+
+  // const terminateInterview = () => {
+  //   console.warn("Interview terminated due to multiple faces");
+
+  //   toast.error("Interview terminated due to multiple faces.", {
+  //     duration: 4000,
+  //   });
+
+  //   // stop camera safely
+  //   try {
+  //     cameraRef.current?.stop();
+  //     const stream = videoRef.current?.srcObject as MediaStream | null;
+  //     stream?.getTracks().forEach((t) => t.stop());
+  //     if (videoRef.current) videoRef.current.srcObject = null;
+  //   } catch { }
+
+  //   setRunning(false);
+
+  //   // optional: mark session invalid
+  //   sessionDataRef.current.push({
+  //     timestamp: Date.now(),
+  //     confidence: 0,
+  //     happy: 0,
+  //     sad: 0,
+  //     nervous: 1,
+  //     surprised: 0,
+  //     blink: 0,
+  //   });
+
+  //   // IMPORTANT: expose stop to parent if needed
+  //   // parent can redirect / lock report generation
+  // };
+
+
+
   // ------------------- On Results -------------------
   const onResults = (results: any) => {
     const video = videoRef.current;
@@ -94,6 +158,38 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
     if (!results.multiFaceLandmarks || !results.multiFaceLandmarks[0]) return;
+
+    const faceCount = results.multiFaceLandmarks?.length || 0;
+
+    if (faceCount > 1) {
+      multiFaceFramesRef.current++;
+
+      ctx.fillStyle = "red";
+      ctx.font = "20px Inter";
+      ctx.fillText(
+        "Multiple faces detected!",
+        canvas.width / 2 - 140,
+        40
+      );
+
+      if (!warningShownRef.current) {
+        warningShownRef.current = true;
+        toast.error(
+          "Multiple faces detected. Interview will end if this continues.",
+          { duration: 3000 }
+        );
+      }
+
+      if (multiFaceFramesRef.current > 30 && !terminatedRef.current) {
+        terminateInterview();
+      }
+
+      return;
+    } else {
+      multiFaceFramesRef.current = 0;
+    }
+
+
 
     const lm = results.multiFaceLandmarks[0];
     // Draw face mesh overlays
@@ -144,7 +240,7 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
     const earStd =
       Math.sqrt(
         earHistoryRef.current.reduce((s, x) => s + (x - earMean) ** 2, 0) /
-          earHistoryRef.current.length
+        earHistoryRef.current.length
       ) || 0.0001;
     const eyeWideFeature = Math.min(
       Math.max((ear - earMean) / (2 * earStd), 0),
@@ -191,9 +287,9 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
       Math.min(
         Math.max(
           0.4 * headDown +
-            0.3 * Math.max(-mouthDown / faceHeight, 0) +
-            0.2 * (1 - browFeature) +
-            0.1 * marFeature,
+          0.3 * Math.max(-mouthDown / faceHeight, 0) +
+          0.2 * (1 - browFeature) +
+          0.1 * marFeature,
           0
         ),
         1
@@ -210,9 +306,9 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
       Math.min(
         1,
         0.5 * blinkFeature +
-          0.3 * gazeAversion +
-          0.2 * marFeature +
-          0.2 * (1 - happyRaw) // Increase nervousness if happy is low
+        0.3 * gazeAversion +
+        0.2 * marFeature +
+        0.2 * (1 - happyRaw) // Increase nervousness if happy is low
         //   0.2 * (1 - finalConf)       // Increase nervousness if confidence is low
       )
     );
@@ -436,12 +532,9 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
 
     // --- Emotion Summary for the JSON prompt ---
     feedback.push(
-      `Overall Emotional Summary: Candidate displayed ${
-        conf >= 0.7 ? "high" : conf >= 0.5 ? "moderate" : "low"
-      } confidence, ${
-        nerv > 0.3 ? "some nervousness" : "strong composure"
-      }, and a ${happ >= 0.5 ? "positive" : "neutral"} demeanor. ${
-        blink >= 25 ? "Slight anxiety detected through eye movement." : ""
+      `Overall Emotional Summary: Candidate displayed ${conf >= 0.7 ? "high" : conf >= 0.5 ? "moderate" : "low"
+      } confidence, ${nerv > 0.3 ? "some nervousness" : "strong composure"
+      }, and a ${happ >= 0.5 ? "positive" : "neutral"} demeanor. ${blink >= 25 ? "Slight anxiety detected through eye movement." : ""
       }`
     );
 
@@ -454,7 +547,7 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
       const stream = videoRef.current?.srcObject as MediaStream | null;
       stream?.getTracks().forEach((t) => t.stop());
       if (videoRef.current) videoRef.current.srcObject = null;
-    } catch {}
+    } catch { }
     setRunning(false);
 
     // Show feedback
@@ -467,6 +560,11 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
 
   // ------------------- UI & Scripts -------------------
   const start = async () => {
+    if (terminatedRef.current) {
+      toast.error("Interview already terminated.");
+      return;
+    }
+
     if (running) return;
     if (!loaded) return alert("MediaPipe not loaded yet.");
     const video = videoRef.current!;
@@ -475,8 +573,9 @@ export default function EmotionAnalyzerPage({ startFn, stopFn }: any) {
         locateFile: (f: string) =>
           `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`,
       });
+      console.log("FaceMesh loaded:", faceMeshRef.current);
       faceMeshRef.current.setOptions({
-        maxNumFaces: 1,
+        maxNumFaces: 5,
         refineLandmarks: true,
         minDetectionConfidence: 0.6,
         minTrackingConfidence: 0.6,

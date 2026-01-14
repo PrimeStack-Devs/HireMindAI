@@ -22,6 +22,7 @@ export const authOptions: NextAuthOptions = {
             return {
               id: String(user.id),
               identifier: user?.email ? user.email : "User without identifier",
+              username: user?.username,
               jwt: jwt,
             };
           }
@@ -40,6 +41,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.jwt = (user as any).jwt;
         token.identifier = (user as any).identifier;
+        token.username = (user as any).username;
       }
       return token;
     },
@@ -47,6 +49,7 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         id: token.sub as string,
         identifier: token.identifier as string,
+        username: token?.username as string,
       };
       session.jwt = token.jwt as string;
       return session;

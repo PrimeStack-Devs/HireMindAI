@@ -5,6 +5,7 @@ declare module "next-auth" {
     user: {
       id: string;
       identifier: string;
+      username: string;
     };
     jwt: string;
   }

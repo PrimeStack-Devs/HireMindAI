@@ -25,7 +25,15 @@ function Page() {
   const [initialStep, setInitialStep] = useState(1);
 
   const { data } = useSession<any>();
+  const session = useSession();
+  const username = session?.data?.user?.username.slice(0, -4);
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (username) {
+      setCandidateName(username);
+    }
+  }, [username]);
 
   // 🔹 Upload + AI extraction
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,8 +150,8 @@ function Page() {
       loadingStage === "upload"
         ? "Uploading Resume"
         : loadingStage === "parse"
-        ? "Analyzing Resume"
-        : "Creating Interview";
+          ? "Analyzing Resume"
+          : "Creating Interview";
     return (
       <div className="flex justify-center flex-col gap-8 items-center w-full h-[80vh]">
         <TrueFocus
@@ -206,7 +214,7 @@ function Page() {
               )}
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <label className={LabelClasses}>Candidate Name</label>
               <input
                 type="text"
@@ -215,7 +223,7 @@ function Page() {
                 placeholder="Enter candidate name"
                 className={InputClasses}
               />
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>

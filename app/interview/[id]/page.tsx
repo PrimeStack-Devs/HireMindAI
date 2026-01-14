@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import VideoPreview from "@/components/video-preview";
 import InterviewChatPane from "@/components/interview-chat-pane";
 import InterviewControls from "@/components/interview-controls";
@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 type Message = { role: "assistant" | "user"; content: string };
 
 export default function InterviewPage({ params }: { params: { id: string } }) {
+  const tabViolationCountRef = useRef(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(false);
@@ -86,6 +87,34 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
       console.log("Initial greeting failed", error);
     }
   };
+
+  useEffect(() => {
+  if (showStartModal || isInterviewCompleted) return;
+
+  const handleVisibilityChange = () => {
+    if (document.hidden) {
+      tabViolationCountRef.current += 1;
+
+      if (tabViolationCountRef.current === 1) {
+        toast.error("Do not switch tabs during the interview.");
+      } else {
+        handleInterviewTermination(
+          "Interview terminated due to tab switching."
+        );
+      }
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+  };
+}, [showStartModal, isInterviewCompleted]);
+
 
   const startInterview = () => {
     unlockPlayback();

@@ -96,7 +96,7 @@ export default function SignupFormDemo() {
             )}
           </button>
           <p className="mt-4 text-center text-sm text-neutral-600 dark:text-neutral-400 text-decoration-underline">
-            Don't Have Any Account <Link href="/auth/login">Login here</Link>
+          Already have an account<Link href="/auth/login">Login here</Link>
           </p>
 
           <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />

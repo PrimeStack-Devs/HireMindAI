@@ -34,7 +34,7 @@ Return ONLY valid JSON. No markdown. No extra text.
     });
 
     const data = await response.json();
-
+console.log("Pollinations Raw Response:", data);
     let content = data?.choices?.[0]?.message?.content?.trim() || "";
     const cleaned = content.replace(/```json/g, "").replace(/```/g, "").trim();
 

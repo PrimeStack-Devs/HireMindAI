@@ -18,20 +18,17 @@ export async function POST(req: Request) {
 
     // ✅ PDF
     if (mimeType === "application/pdf") {
-      const pdfUrl = await uploadPdfAsImage(base64, file.name);
+      const pdfUpload = await uploadPdfAsImage(base64, file.name);
 
-      // ✅ This will now work perfectly
-      const previewImageUrl = pdfUrl.replace(
-        "/upload/",
-        "/upload/pg_1,f_png/"
-      );
+      // ✅ 100% correct preview image URL (page 1 PNG)
+      const previewImageUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/pg_1,f_png/v${pdfUpload.version}/${pdfUpload.public_id}.png`;
 
-      console.log("PDF URL:", pdfUrl);
-      console.log("PREVIEW URL:", previewImageUrl);
+      console.log("PDF URL:", pdfUpload.secure_url);
+      console.log("PREVIEW IMAGE URL:", previewImageUrl);
 
       return NextResponse.json({
-        result: pdfUrl,
-        pdfUrl,
+        result: previewImageUrl, // ✅ always image
+        pdfUrl: pdfUpload.secure_url, // optional
         previewImageUrl,
         type: "pdf",
       });
@@ -42,6 +39,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       result: imageUrl,
+      previewImageUrl: imageUrl,
       type: "image",
     });
   } catch (error) {

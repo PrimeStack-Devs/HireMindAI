@@ -19,18 +19,22 @@ export const uploadImage = async (file: string) => {
   }
 };
 
-// ✅ NEW: Upload PDF as IMAGE so we can create preview page image
+// ✅ Upload PDF so Cloudinary stores it and we can transform it to PNG
 export const uploadPdfAsImage = async (base64: string, fileName?: string) => {
   const publicId = fileName
-    ? fileName.replace(/\.[^/.]+$/, "") // remove extension
+    ? fileName.replace(/\.[^/.]+$/, "")
     : undefined;
 
   const res = await cloudinary.uploader.upload(base64, {
-    resource_type: "image", // ✅ IMPORTANT (not raw)
+    resource_type: "image",
     folder: "AiInterviewer/resumes",
     public_id: publicId,
-    format: "pdf", // ✅ IMPORTANT
+    format: "pdf",
   });
 
-  return res.secure_url;
+  return {
+    secure_url: res.secure_url,
+    public_id: res.public_id,
+    version: res.version,
+  };
 };

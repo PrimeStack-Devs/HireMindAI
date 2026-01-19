@@ -66,7 +66,7 @@ const uploadedUrl = json.previewImageUrl || json.result;
 
 if (!uploadedUrl) throw new Error("Upload failed");
 
-setResumeUrl(json.result); // ✅ keep original stored url (pdf or image)
+setResumeUrl(json.previewImageUrl || json.result);// ✅ keep original stored url (pdf or image)
 
 toast.success(
   json.type === "pdf"

@@ -3,9 +3,8 @@
 import { useEffect, useRef } from "react";
 import AISpeakingBars from "./ai-speaking-bars";
 import MicVisualizer from "./mic-visualizer";
-import SegmentedToggle from "./segmented-toggle";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+import { Mic, MicOff, SendHorizonal, X } from "lucide-react";
 
 export default function InterviewControls({
   aiSpeaking,
@@ -37,6 +36,18 @@ export default function InterviewControls({
   // ✅ prevent infinite restart loop after stop()
   const manuallyStoppedRef = useRef<boolean>(false);
 
+  // ✅ textarea ref for autosize
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // ✅ autosize textarea whenever text changes
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    el.style.height = "0px";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [text]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -56,27 +67,32 @@ export default function InterviewControls({
     recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event: any) => {
-      let interimTranscript = "";
+ recognition.onresult = (event: any) => {
+  let finalText = "";
+  let interimText = "";
 
-      // ✅ process only changed results
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        const spokenText = result[0]?.transcript || "";
+  // ✅ rebuild complete transcript from scratch every time
+  for (let i = 0; i < event.results.length; i++) {
+    const result = event.results[i];
+    const spokenText = result[0]?.transcript || "";
 
-        if (result.isFinal) {
-          // ✅ add ONLY new final transcripts (prevents loop repeating)
-          if (i > lastFinalIndexRef.current) {
-            finalTranscriptRef.current += spokenText.trim() + " ";
-            lastFinalIndexRef.current = i;
-          }
-        } else {
-          interimTranscript += spokenText;
-        }
-      }
+    if (result.isFinal) {
+      finalText += spokenText + " ";
+    } else {
+      interimText += spokenText + " ";
+    }
+  }
 
-      setText((finalTranscriptRef.current + interimTranscript).trim());
-    };
+  const merged = (finalText + interimText).replace(/\s+/g, " ").trim();
+
+  // ✅ keep refs updated
+  finalTranscriptRef.current = finalText.replace(/\s+/g, " ").trim() + " ";
+  lastFinalIndexRef.current = event.results.length - 1;
+
+  setText(merged);
+};
+
+
 
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
@@ -114,10 +130,11 @@ export default function InterviewControls({
     if (listening) {
       manuallyStoppedRef.current = false;
 
-      // ✅ reset everything when starting
-      finalTranscriptRef.current = "";
+      // ✅ IMPORTANT FIX:
+      // Don't clear existing text when mic starts.
+      // Just continue from current text.
+      finalTranscriptRef.current = text?.trim() ? text.trim() + " " : "";
       lastFinalIndexRef.current = -1;
-      setText("");
 
       try {
         recognition.start();
@@ -129,13 +146,19 @@ export default function InterviewControls({
         recognition.stop();
       } catch {}
     }
-  }, [listening, setText]);
+  }, [listening, text]);
 
   // ✅ stop listening when AI starts speaking
   useEffect(() => {
     if (!aiSpeaking) return;
     setListening(false);
   }, [aiSpeaking, setListening]);
+
+  const handleClear = () => {
+    setText("");
+    finalTranscriptRef.current = "";
+    lastFinalIndexRef.current = -1;
+  };
 
   return (
     <div className="w-full p-2">
@@ -151,89 +174,116 @@ export default function InterviewControls({
         </div>
       ) : (
         <div className="space-y-2">
-          <SegmentedToggle
-            value={mode}
-            onChange={(v) => setMode(v as "voice" | "text")}
-            options={[
-              { label: "Voice", value: "voice" },
-              { label: "Text", value: "text" },
-            ]}
-            className="w-full"
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs text-muted-foreground text-center"
+          >
+            {listening
+              ? "Listening... (you can edit text too)"
+              : "Type or use mic"}
+          </motion.div>
 
-          {/* Voice */}
-          {mode === "voice" && (
-            <div className="flex flex-col items-center gap-2">
-              <MicVisualizer active={listening} />
-
-              <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-xs text-muted-foreground"
-              >
-                {listening ? "Listening..." : "Tap mic to speak"}
-              </motion.div>
-
-              <div className="flex gap-2 w-full">
-                <button
-                  type="button"
-                  onClick={() => setListening((s) => !s)}
-                  className="flex-1 rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow hover:opacity-90"
-                >
-                  {listening ? "Stop" : "Start"} Mic
-                </button>
-
-                {text?.trim() && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setListening(false);
-                      handleSend(text.trim());
-
-                      // ✅ clear after sending
-                      setText("");
-                      finalTranscriptRef.current = "";
-                      lastFinalIndexRef.current = -1;
-                    }}
-                    className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs font-medium hover:bg-muted"
-                  >
-                    Send
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Text */}
-          {mode === "text" && (
-            <div className="flex gap-2">
-              <Input
-                placeholder="Type your answer..."
+          {/* ✅ Unified textarea + mic + clear + send */}
+          <div className="flex gap-2 items-end">
+            {/* Left: Auto-growing textarea */}
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                placeholder="Type your answer... or speak"
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                rows={1}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setText(value);
+
+                  // ✅ editing allowed while mic is ON
+                  finalTranscriptRef.current = value ? value.trim() + " " : "";
+                  lastFinalIndexRef.current = -1;
+                }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && text.trim()) {
+                  // Enter = send, Shift+Enter = new line
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!text.trim()) return;
+
+                    setListening(false);
                     handleSend(text.trim());
-                    setText("");
+
+                    handleClear();
                   }
                 }}
-                className="flex-1 text-sm"
+                className="
+                  w-full resize-none overflow-hidden
+                  rounded-md border border-border bg-background
+                  px-3 py-2 text-sm outline-none
+                  focus:ring-1 focus:ring-primary
+                "
+                style={{ minHeight: "40px", maxHeight: "140px" }}
               />
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (text.trim()) {
-                    handleSend(text.trim());
-                    setText("");
-                  }
-                }}
-                className="rounded-md bg-primary px-2 py-1 text-sm font-semibold text-primary-foreground shadow hover:opacity-90"
-              >
-                Send
-              </button>
+              {/* ✅ Clear button (only when text exists) */}
+              {text?.trim() && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  title="Clear"
+                  aria-label="Clear"
+                  className="
+                    absolute right-2 top-2
+                    h-7 w-7 rounded-md
+                    flex items-center justify-center
+                    border border-border bg-background
+                    hover:bg-muted transition
+                  "
+                >
+                  <X size={16} />
+                </button>
+              )}
             </div>
-          )}
+
+            {/* Mic Button */}
+            <button
+              type="button"
+              onClick={() => setListening((s) => !s)}
+              className={`h-10 w-10 flex items-center justify-center rounded-md border transition
+                ${
+                  listening
+                    ? "bg-red-500 text-white border-red-500"
+                    : "bg-background text-foreground border-border hover:bg-muted"
+                }`}
+              title={listening ? "Stop Mic" : "Start Mic"}
+              aria-label={listening ? "Stop Mic" : "Start Mic"}
+            >
+              {listening ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
+
+            {/* Send button */}
+            <button
+              type="button"
+              disabled={!text?.trim()}
+              onClick={() => {
+                if (!text.trim()) return;
+
+                setListening(false);
+                handleSend(text.trim());
+
+                handleClear();
+              }}
+              className={`h-10 w-10 flex items-center justify-center rounded-md border transition
+                ${
+                  text?.trim()
+                    ? "bg-primary text-primary-foreground border-primary hover:opacity-90"
+                    : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-border"
+                }`}
+              title="Send"
+              aria-label="Send"
+            >
+              <SendHorizonal size={18} />
+            </button>
+          </div>
+
+        
         </div>
       )}
     </div>

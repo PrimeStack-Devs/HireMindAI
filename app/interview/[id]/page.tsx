@@ -11,13 +11,14 @@ import { useChat } from "./useChat";
 import { useMurfTTS } from "./useMurfTTS";
 import toast from "react-hot-toast";
 import { strapi } from "@/lib/api/sdk";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { Loader2, Volume2, VolumeX } from "lucide-react";
 
 type Message = { role: "assistant" | "user"; content: string };
 
 export default function InterviewPage({ params }: { params: { id: string } }) {
   const tabViolationCountRef = useRef(0);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(false);
@@ -28,9 +29,13 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const [startAnalyticts, setStartAnalyticts] = useState<any>(null);
   const [stopAnalyticts, setStopAnalyticts] = useState<any>(null);
 
-  const [showStartModal, setShowStartModal] = useState(true); // show modal initially
+  const [showStartModal, setShowStartModal] = useState(true);
+
+  // ✅ mute state
+  const [muted, setMuted] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   const {
     generateSpeech,
@@ -39,18 +44,54 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     isPlaying,
     setIsLoading: setIsSpeechLoading,
     isLoading: isSpeechLoading,
-    error: speechError,
   } = useMurfTTS({ voiceId: "en-US-natalie" });
 
-  const { sendMessage, isLoading: isChatLoading } = useChat({
+  // ✅ FIX: stop audio on route change
+  useEffect(() => {
+    stop();
+    setAiSpeaking(false);
+    setIsSpeechLoading(false);
+  }, [pathname]);
+
+  // ✅ FIX: stop audio when page unmounts
+  useEffect(() => {
+    return () => {
+      stop();
+      setAiSpeaking(false);
+      setIsSpeechLoading(false);
+    };
+  }, []);
+
+  // ✅ Toggle mute handler
+  const toggleMute = () => {
+    setMuted((prev) => {
+      const next = !prev;
+
+      if (next) {
+        // Muting => stop immediately
+        stop();
+        setAiSpeaking(false);
+        setIsSpeechLoading(false);
+      } else {
+        // Unmuting => unlock playback again
+        unlockPlayback();
+      }
+
+      return next;
+    });
+  };
+
+  const { sendMessage } = useChat({
     messages,
     setMessages,
     setAiSpeaking,
     setIsInterviewCompleted,
-    generateSpeech,
+
+    // ✅ block speech when muted
+    generateSpeech: muted ? async () => {} : generateSpeech,
   });
 
-  const { data, error, isLoading } = useStrapi("interviews", {
+  const { data, isLoading } = useStrapi("interviews", {
     populate: "*",
     filters: { documentId: params.id },
   });
@@ -65,6 +106,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     skills: interviewData?.[0]?.skills || "",
     username: interviewData?.[0]?.candidateName || "",
   };
+
   const resumeUrl = interviewData?.[0]?.resume || "";
 
   // Initial greeting
@@ -88,33 +130,30 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     }
   };
 
+  // ✅ Tab switch detection
   useEffect(() => {
-  if (showStartModal || isInterviewCompleted) return;
+    if (showStartModal || isInterviewCompleted) return;
 
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      tabViolationCountRef.current += 1;
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        tabViolationCountRef.current += 1;
 
-      if (tabViolationCountRef.current === 1) {
-        toast.error("Do not switch tabs during the interview.");
-      } else {
-        handleInterviewTermination(
-          "Interview terminated due to tab switching."
-        );
+        if (tabViolationCountRef.current === 1) {
+          toast.error("Do not switch tabs during the interview.");
+        } else {
+          handleInterviewTermination(
+            "Interview terminated due to tab switching."
+          );
+        }
       }
-    }
-  };
+    };
 
-  document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-  return () => {
-    document.removeEventListener(
-      "visibilitychange",
-      handleVisibilityChange
-    );
-  };
-}, [showStartModal, isInterviewCompleted]);
-
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [showStartModal, isInterviewCompleted]);
 
   const startInterview = () => {
     unlockPlayback();
@@ -135,24 +174,23 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const handleInterviewTermination = async (reason: string) => {
     toast.error(reason);
 
-    // LOCK IMMEDIATELY
     setIsInterviewCompleted(true);
     setShowStartModal(false);
+
+    stop();
+    setAiSpeaking(false);
+    setIsSpeechLoading(false);
 
     if (stopAnalyticts && typeof stopAnalyticts === "function") {
       try {
         stopAnalyticts();
-      } catch { }
+      } catch {}
     }
 
-    // optional small delay for UX
-    setTimeout(async () => {
+    setTimeout(() => {
       router.push("/");
-      // await generateReport();
     }, 500);
   };
-
-
 
   const generateReport = async () => {
     setIsGeneratingReport(true);
@@ -161,9 +199,11 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
       if (stopAnalyticts) {
         feed = stopAnalyticts();
       }
+
       await strapi.update("interviews", params.id, {
         conversation: messages,
       });
+
       const res = await fetch("/api/interview/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,15 +213,17 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
           faceMeshFeedback: feed,
         }),
       });
+
       if (!res.ok) throw new Error("Failed to generate report");
 
       const report = await res.json();
-      // const report = data?.report;
+
       if (report) {
         await strapi.update("interviews", params.id, {
           report: JSON.stringify(report),
         });
       }
+
       toast.success("Report generated!");
       router.push("/reports");
     } catch (err) {
@@ -190,11 +232,10 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     } finally {
       setIsGeneratingReport(false);
     }
-  }
-
+  };
 
   return (
-    <main className="grid  min-h-[80vh] grid-rows-[auto_1fr] relative">
+    <main className="grid min-h-[80vh] grid-rows-[auto_1fr] relative">
       {/* Start Modal */}
       {showStartModal && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center backdrop-blur-2xl text-white">
@@ -217,7 +258,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-15">
-        {/* Left: Full-height user video */}
+        {/* Left Video */}
         <section className="order-2 md:order-1 md:col-span-8">
           <Card className="m-4 h-[calc(100vh-120px)] overflow-hidden p-0 md:m-6">
             {!isInterviewCompleted ? (
@@ -229,37 +270,64 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
             ) : (
               <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                 <h2 className="mb-4 text-2xl font-bold">Interview Terminated</h2>
-                {/* <p className="mb-6">Thank you for completing the interview.</p> */}
               </div>
-            )
-            }
+            )}
           </Card>
         </section>
 
-        {/* Right: AI text panel and controls */}
+        {/* Right Chat */}
         <aside className="order-1 md:order-2 md:col-span-7">
           <div className="m-4 flex h-[calc(100vh-120px)] flex-col gap-4 md:m-6">
-            <Card className="flex-1 overflow-hidden">
+            <Card className="flex-1 overflow-hidden relative">
+              {/* ✅ Custom Mute Button */}
+             
+             {!showStartModal&&
+              <button
+              type="button"
+              onClick={toggleMute}
+              aria-label={muted ? "Unmute AI" : "Mute AI"}
+              title={muted ? "Unmute AI" : "Mute AI"}
+              disabled={isInterviewCompleted}
+              className={`absolute right-3 top-3 z-10 flex items-center justify-center rounded-full transition
+                w-9 h-9
+                ${
+                    isInterviewCompleted
+                      ? "opacity-50 cursor-not-allowed"
+                      : "opacity-80 hover:opacity-100"
+                      }
+                  ${
+                    muted
+                    ? "bg-red-500 text-white"
+                    : "bg-black/40 text-white border border-white/20"
+                    }
+                    `}
+                    >
+                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              </button>
+              }
+
               <InterviewChatPane
                 messages={messages}
-                isSpeechLoading={isSpeechLoading || aiSpeaking}
+                isSpeechLoading={!muted && (isSpeechLoading || aiSpeaking)}
                 setMessages={setMessages}
               />
             </Card>
+
             <Card className="p-4 flex items-center justify-center">
               {!isInterviewCompleted ? (
                 <InterviewControls
-                  aiSpeaking={isSpeechLoading || isPlaying || aiSpeaking}
+                  aiSpeaking={!muted && (isSpeechLoading || isPlaying || aiSpeaking)}
                   mode={mode}
                   listening={listening}
                   text={text}
-                  // setAiSpeaking={setAiSpeaking}
                   setMode={setMode}
                   setListening={setListening}
                   setText={setText}
                   handleSend={async (c) => {
                     await sendMessage({ content: c, interviewDetails });
-                    setIsSpeechLoading(true);
+
+                    if (!muted) setIsSpeechLoading(true);
+
                     setText("");
                   }}
                 />

@@ -24,6 +24,8 @@ export default function ReportsPage() {
     sort: ["createdAt:desc"],
   });
 
+  console.log("data", data)
+
   const [selectedReport, setSelectedReport] = useState<any | null>(null);
 
   const handleAnalyseResume = ({ url }: { url: string }) => {
@@ -60,6 +62,19 @@ export default function ReportsPage() {
         Failed to load reports. Please refresh.
       </div>
     );
+
+
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   return (
     <main className="min-h-screen  text-gray-200 p-6 sm:p-10">
@@ -115,6 +130,8 @@ export default function ReportsPage() {
                   >
                     <div className="space-y-4">
                       {/* Title */}
+
+
                       <p className="text-xl font-semibold text-indigo-400 tracking-wide">
                         {interview.details || "Untitled Interview"}
                       </p>
@@ -133,17 +150,22 @@ export default function ReportsPage() {
                           </span>{" "}
                           {interview.difficulty}
                         </p>
-                        <p className="col-span-2 text-wrap break-all">
+                        <p className=" ">
                           <span className="font-medium text-gray-300">
                             Skills:
                           </span>{" "}
-                          {interview.skills}
+                          {interview.skills.slice(0, 30)}....
                         </p>
-                        <p className="col-span-2">
+                        <p>
                           <span className="font-medium text-gray-300">
                             Questions:
                           </span>{" "}
                           {interview.numberOfQuestions}
+
+                        </p>
+                        <p className="col-span-2">
+ <span className="font-medium text-gray-300">Date:</span>{" "}
+                        {formatDateTime(interview.createdAt)}
                         </p>
                       </div>
                     </div>

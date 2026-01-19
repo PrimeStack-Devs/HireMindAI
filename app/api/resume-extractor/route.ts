@@ -6,34 +6,18 @@ export async function POST(req: Request) {
     const systemPrompt = `
 You are a highly accurate resume parsing model. You receive a resume image and must extract key data fields needed to configure an AI interview.
 
-Your output must be a **strict JSON object** matching the structure below — no extra text, markdown, or explanations.
+Return ONLY valid JSON. No markdown. No extra text.
 
 {
-  "candidateName": "Full name of the candidate",
-  "skills": "Comma-separated list of main skills or technologies (e.g., React,Node.js,MongoDB) and also in camelCases without spaces",
-  "topic": "Job role or specialization (e.g., Frontend Developer, Data Analyst)",
-  "difficulty": "easy | medium | hard (estimate based on experience or skill level, use 'medium' if unclear)",
-  "mode": "Technical | HR (guess based on resume focus, default to Technical)",
-  "experience": "Number of years or 'Fresher' if no experience mentioned",
-  "education": "Highest qualification or degree (e.g., BCA, B.Tech, MCA)",
-  "projects": [
-    {
-      "title": "Project name",
-      "description": "Short 1–2 line project summary"
-    }
-  ]
+  "candidateName": "",
+  "skills": "",
+  "topic": "",
+  "difficulty": "medium",
+  "mode": "Technical",
+  "experience": "",
+  "education": "",
+  "projects": []
 }
-
-### Rules
-1. Output **only valid JSON**, no extra characters or text don't give "'''json" just start with { and end with }.
-2. Include all keys, even if null or empty.
-3. Use concise values — no long paragraphs.
-4. For 'skills', join them as a comma-separated string for easier use in forms but remember if it have space in it (critical thinking) then write it as (criticalThinking).
-5. For 'topic', prefer the job title, specialization, or last relevant role.
-6. If unsure, set 'difficulty' to "medium" and 'mode' to "Technical".
-7. Do **not** guess unrelated information.
-
-Goal: Return structured data that can prefill the interview setup UI (candidate name, skills, topic, difficulty, mode, etc.) directly.
 `;
 
     const API_URI = "https://text.pollinations.ai/openai";
@@ -52,15 +36,28 @@ Goal: Return structured data that can prefill the interview setup UI (candidate 
     const data = await response.json();
 
     let content = data?.choices?.[0]?.message?.content?.trim() || "";
-    const cleaned = content?.replace(/```json/g, "")?.replace(/```/g, "")?.trim();
-    console.log("Generated Resume Extraction:", cleaned);
+    const cleaned = content.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    return new Response(cleaned, {
+    // ✅ Must be JSON always
+    let parsedJson: any;
+    try {
+      parsedJson = JSON.parse(cleaned);
+    } catch {
+      return new Response(
+        JSON.stringify({
+          error: "AI did not return valid JSON",
+          raw: cleaned,
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    return new Response(JSON.stringify(parsedJson), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Data Extraction error:", error);
+    console.error("Resume extractor error:", error);
     return new Response(JSON.stringify({ error: "Failed to Extract Data" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

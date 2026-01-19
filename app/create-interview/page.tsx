@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 
 function Page() {
   const [candidateName, setCandidateName] = useState("");
+  const [loading, setLoading] = useState(false);
   const [resume, setResume] = useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [mode, setMode] = useState("Technical");
@@ -36,71 +37,101 @@ function Page() {
   }, [username]);
 
   // 🔹 Upload + AI extraction
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    setResume(file);
-    setLoadingStage("upload");
+  const isImage = file.type.startsWith("image/");
+  const isPdf = file.type === "application/pdf";
 
+  if (!isImage && !isPdf) {
+    toast.error("Only Image or PDF resume is allowed");
+    return;
+  }
+
+  setResume(file);
+  setLoadingStage("upload");
+
+  try {
+    const formData = new FormData();
+    formData.append("image", file); // ✅ keep same key
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+  const json = await res.json();
+const uploadedUrl = json.previewImageUrl || json.result;
+
+if (!uploadedUrl) throw new Error("Upload failed");
+
+setResumeUrl(json.result); // ✅ keep original stored url (pdf or image)
+
+toast.success(
+  json.type === "pdf"
+    ? "PDF uploaded & converted to image ✅"
+    : "Resume uploaded successfully ✅"
+);
+
+    // 🧠 AI parsing
+    setLoadingStage("parse");
+
+    const AI_RES = await fetch("/api/resume-extractor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: { url: uploadedUrl },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    // ✅ SAFETY: do not directly do AI_RES.json()
+    const raw = await AI_RES.text();
+
+    let aiData: any;
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const json = await res.json();
-      const uploadedUrl = json.result;
-
-      if (!uploadedUrl) throw new Error("Upload failed");
-
-      setResumeUrl(uploadedUrl);
-      toast.success("Resume uploaded successfully");
-
-      // 🧠 AI parsing
-      setLoadingStage("parse");
-
-      const AI_RES = await fetch("/api/resume-extractor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image_url",
-                  image_url: { url: uploadedUrl },
-                },
-              ],
-            },
-          ],
-        }),
-      });
-
-      const aiData = await AI_RES.json();
-      console.log("AI Resume Extraction:", aiData);
-
-      if (aiData) {
-        setCandidateName(aiData.candidateName || "");
-        setSkills(aiData.skills || "");
-        setTopic(aiData.topic || "");
-        setDifficulty(aiData.difficulty || "medium");
-        setMode(aiData.mode || "Technical");
-        setInitialStep(2);
-      }
-
-      toast.success("Resume analyzed successfully");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error uploading or parsing resume");
-    } finally {
-      setLoadingStage("idle");
+      aiData = JSON.parse(raw);
+    } catch (e) {
+      console.log("Resume extractor raw response:", raw);
+      toast.error("Resume analysis failed (invalid JSON response)");
+      return;
     }
-  };
+
+    if (aiData?.error) {
+      console.log("Resume extractor error:", aiData);
+      toast.error(aiData.error);
+      return;
+    }
+
+    console.log("AI Resume Extraction:", aiData);
+
+    setCandidateName(aiData.candidateName || "");
+    setSkills(aiData.skills || "");
+    setTopic(aiData.topic || "");
+    setDifficulty(aiData.difficulty || "medium");
+    setMode(aiData.mode || "Technical");
+    setInitialStep(2);
+
+    toast.success("Resume analyzed successfully");
+  } catch (err) {
+    console.error(err);
+    toast.error("Error uploading or parsing resume");
+  } finally {
+    setLoadingStage("idle");
+  }
+};
+
+
 
   const handleSubmitFinal = async () => {
     try {
@@ -123,6 +154,7 @@ function Page() {
       });
 
       toast.success("Interview Created Successfully");
+      setLoading(true)
       router.push(`/interview/${res.data.documentId}`);
     } catch (error) {
       console.error(error);
@@ -169,6 +201,7 @@ function Page() {
   // --- MAIN UI ---
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center py-16 bg-transparent text-white">
+     {loading?<div className="w-4 h-4 border-r-2 border-r-white rounded-full animate-spin"></div>:
       <Stepper
         initialStep={initialStep}
         onFinalStepCompleted={handleSubmitFinal}
@@ -204,7 +237,7 @@ function Page() {
               <input
                 type="file"
                 onChange={handleFileChange}
-                accept="image/*"
+                accept="image/*,application/pdf,.pdf"
                 className={FileInputClasses}
               />
               {resume && (
@@ -340,7 +373,7 @@ function Page() {
             </p>
           </div>
         </Step>
-      </Stepper>
+      </Stepper>}
     </div>
   );
 }

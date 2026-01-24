@@ -10,6 +10,27 @@ export function useChat({
 }: any) {
   const [isLoading, setIsLoading] = useState(false);
   
+  function cleanTextForTTS(text: string) {
+    return text
+      // Remove markdown bold/italic
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+
+      // Remove headings (#, ##, ###)
+      .replace(/^#+\s*/gm, "")
+
+      // Remove bullet points
+      .replace(/^-+\s*/gm, "")
+      .replace(/•\s*/g, "")
+
+      // Remove extra line breaks
+      .replace(/\n{2,}/g, ". ")
+
+      // Trim spaces
+      .trim();
+  }
+
+  
 const sendMessage = useCallback(
   async ({ content, interviewDetails }: any): Promise<void> => {
     if (!content) return;
@@ -69,7 +90,8 @@ const sendMessage = useCallback(
 
       // 🔹 Generate AI speech after full response
       if (aiContent) {
-        generateSpeech(aiContent);
+        const cleanedText = cleanTextForTTS(aiContent);
+        generateSpeech(cleanedText);
       }
     } catch (error) {
       console.error("❌ Error sending message:", error);

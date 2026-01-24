@@ -272,6 +272,9 @@ toast.success(
                   <option className="text-black" value="Technical">
                     Technical
                   </option>
+                  <option className="text-black" value="Coding">
+                    Coding
+                  </option>
                 </select>
               </div>
 

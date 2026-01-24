@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { strapi } from "@/lib/api/sdk";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2, Volume2, VolumeX } from "lucide-react";
+import { useElevenLabsTTS } from "./useElevenLabsTTS";
 
 type Message = { role: "assistant" | "user"; content: string };
 
@@ -37,8 +38,14 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const pathname = usePathname();
 
+
+  const { generateSpeech } = useElevenLabsTTS({
+    onStart: () => setAiSpeaking(true),
+    onEnd: () => setAiSpeaking(false),
+  });
+
   const {
-    generateSpeech,
+    // generateSpeech,
     stop,
     unlockPlayback,
     isPlaying,

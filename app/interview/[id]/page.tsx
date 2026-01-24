@@ -310,6 +310,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
                 messages={messages}
                 isSpeechLoading={!muted && (isSpeechLoading || aiSpeaking)}
                 setMessages={setMessages}
+                mode={interviewData?.[0]?.mode }
               />
             </Card>
 

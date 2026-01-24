@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
 
 export default function InterviewChatPane({
   messages,
   isSpeechLoading,
   setMessages,
+  mode
 }: any) {
   const ref = useRef<HTMLDivElement | null>(null);
-
+  console.log(mode);
+  
   useEffect(() => {
     ref.current?.scrollTo({
       top: ref.current.scrollHeight,
@@ -38,27 +44,91 @@ export default function InterviewChatPane({
         {displayedMessages.map((m: any, i: number) => (
           <div key={i} className="flex">
             <div
-              className={`max-w-[80%] rounded-lg border break-words whitespace-pre-wrap px-3 py-2 text-sm ${
-                m.role === "assistant"
-                  ? "bg-muted"
+              className={`max-w-[80%] rounded-lg border break-words px-3 py-2 text-sm ${
+                m.role === "assistant" 
+                  ? "bg-muted" 
                   : "ml-auto bg-primary text-primary-foreground"
               }`}
             >
-              {Array.isArray(m.content)
-                ? m.content?.map((cont: any, i: number) => (
-                    <div key={i}>
-                      {cont.type === "image_url" ? (
-                        <img
-                          className="my-2 max-h-96 w-auto rounded-md border"
-                          alt="Generated"
-                          src={cont.image_url.url}
-                        />
-                      ) : (
-                        cont.text
-                      )}
-                    </div>
-                  ))
-                : m.content}
+              {Array.isArray(m.content) ? (
+                m.content?.map((cont: any, idx: number) => (
+                  <div key={idx}>
+                    {cont.type === "image_url" ? (
+                      <img
+                        className="my-2 max-h-96 w-auto rounded-md border"
+                        alt="Generated"
+                        src={cont.image_url.url}
+                      />
+                    ) : mode === "Coding" && m.role === "assistant" ? (
+                      <div className="markdown-content">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]} 
+                          rehypePlugins={[rehypeHighlight]}
+                          components={{
+                            code(props: any) {
+                              const {inline, className, children, ...rest} = props;
+                              return !inline ? (
+                                <code className={className} {...rest}>
+                                  {children}
+                                </code>
+                              ) : (
+                                <code className="bg-muted px-1 py-0.5 rounded text-xs" {...rest}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                            pre(props: any) {
+                              const {children, ...rest} = props;
+                              return (
+                                <pre className="bg-gray-900 rounded-md p-4 overflow-x-auto my-2" {...rest}>
+                                  {children}
+                                </pre>
+                              );
+                            },
+                          }}
+                        >
+                          {cont.text}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{cont.text}</span>
+                    )}
+                  </div>
+                ))
+              ) : mode === "Coding" && m.role === "assistant" ? (
+                <div className="markdown-content">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]} 
+                    rehypePlugins={[rehypeHighlight]}
+                    components={{
+                      code(props: any) {
+                        const {inline, className, children, ...rest} = props;
+                        return !inline ? (
+                          <code className={className} {...rest}>
+                            {children}
+                          </code>
+                        ) : (
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs" {...rest}>
+                            {children}
+                          </code>
+                        );
+                      },
+                      pre(props: any) {
+                        const {children, ...rest} = props;
+                        return (
+                          <pre className="bg-gray-900 rounded-md p-4 overflow-x-auto my-2" {...rest}>
+                            {children}
+                          </pre>
+                        );
+                      },
+                    }}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <span className="whitespace-pre-wrap">{m.content}</span>
+              )}
             </div>
           </div>
         ))}

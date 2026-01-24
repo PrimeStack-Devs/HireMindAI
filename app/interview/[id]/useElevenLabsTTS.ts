@@ -11,6 +11,13 @@ export function useElevenLabsTTS({
 } = {}) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    const terminateAudio = useCallback(() => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = "";
+        }
+    }, []);
+
     const generateSpeech = useCallback(async (text: string) => {
         if (!text) return;
 
@@ -54,5 +61,6 @@ export function useElevenLabsTTS({
 
     return {
         generateSpeech,
+        terminateAudio,
     };
 }

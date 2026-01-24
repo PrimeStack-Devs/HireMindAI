@@ -39,7 +39,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const pathname = usePathname();
 
 
-  const { generateSpeech } = useElevenLabsTTS({
+  const { generateSpeech, terminateAudio } = useElevenLabsTTS({
     onStart: () => setAiSpeaking(true),
     onEnd: () => setAiSpeaking(false),
   });
@@ -95,7 +95,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     setIsInterviewCompleted,
 
     // ✅ block speech when muted
-    generateSpeech: muted ? async () => {} : generateSpeech,
+    generateSpeech: muted ? async () => { } : generateSpeech,
   });
 
   const { data, isLoading } = useStrapi("interviews", {
@@ -178,8 +178,10 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     );
   }
 
-  const handleInterviewTermination = async (reason: string) => {
-    toast.error(reason);
+  const handleInterviewTermination = async (reason?: string) => {
+    terminateAudio();
+    if (isInterviewCompleted) return;
+    if (reason) toast.error(reason);
 
     setIsInterviewCompleted(true);
     setShowStartModal(false);
@@ -191,7 +193,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     if (stopAnalyticts && typeof stopAnalyticts === "function") {
       try {
         stopAnalyticts();
-      } catch {}
+      } catch { }
     }
 
     setTimeout(() => {
@@ -287,30 +289,28 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
           <div className="m-4 flex h-[calc(100vh-120px)] flex-col gap-4 md:m-6">
             <Card className="flex-1 overflow-hidden relative">
               {/* ✅ Custom Mute Button */}
-             
-             {!showStartModal&&
-              <button
-              type="button"
-              onClick={toggleMute}
-              aria-label={muted ? "Unmute AI" : "Mute AI"}
-              title={muted ? "Unmute AI" : "Mute AI"}
-              disabled={isInterviewCompleted}
-              className={`absolute right-3 top-3 z-10 flex items-center justify-center rounded-full transition
+
+              {!showStartModal &&
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  aria-label={muted ? "Unmute AI" : "Mute AI"}
+                  title={muted ? "Unmute AI" : "Mute AI"}
+                  disabled={isInterviewCompleted}
+                  className={`absolute right-3 top-3 z-10 flex items-center justify-center rounded-full transition
                 w-9 h-9
-                ${
-                    isInterviewCompleted
+                ${isInterviewCompleted
                       ? "opacity-50 cursor-not-allowed"
                       : "opacity-80 hover:opacity-100"
-                      }
-                  ${
-                    muted
-                    ? "bg-red-500 text-white"
-                    : "bg-black/40 text-white border border-white/20"
+                    }
+                  ${muted
+                      ? "bg-red-500 text-white"
+                      : "bg-black/40 text-white border border-white/20"
                     }
                     `}
-                    >
-                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              </button>
+                >
+                  {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                </button>
               }
 
               <InterviewChatPane

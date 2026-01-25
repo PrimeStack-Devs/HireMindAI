@@ -115,10 +115,10 @@ export function useElevenLabsTTS({
                             sourceBuffer.addEventListener("updateend", onUpdateEnd);
                         });
 
-                        // Start audio ASAP after first chunk
+                        // 🔥 Start audio ASAP after first chunk
                         if (!hasStartedPlaying) {
                             hasStartedPlaying = true;
-                            await audio.play(); 
+                            await audio.play(); // must be user-initiated upstream
                         }
                     }
 

@@ -190,7 +190,7 @@ export default function InterviewReport({ report }: { report?: any }) {
                   </h4>
                   {data.answerAnalysis.strengths.length ? (
                     <ul className="list-disc list-inside text-sm text-slate-300 mt-2 space-y-1">
-                      {data.answerAnalysis.strengths.map((s, idx) => (
+                      {data.answerAnalysis.strengths.map((s:any, idx:any) => (
                         <li key={idx}>{s}</li>
                       ))}
                     </ul>
@@ -205,7 +205,7 @@ export default function InterviewReport({ report }: { report?: any }) {
                   </h4>
                   {data.answerAnalysis.weaknesses.length ? (
                     <ul className="list-disc list-inside text-sm text-slate-300 mt-2 space-y-1">
-                      {data.answerAnalysis.weaknesses.map((w, idx) => (
+                      {data.answerAnalysis.weaknesses.map((w:any, idx:any) => (
                         <li key={idx}>{w}</li>
                       ))}
                     </ul>
@@ -233,7 +233,7 @@ export default function InterviewReport({ report }: { report?: any }) {
                 <div>
                   <h5 className="text-xs text-slate-400">Insights</h5>
                   <ul className="mt-1 text-sm text-slate-300 list-disc list-inside">
-                    {data.answerAnalysis.insights.map((i, idx) => (
+                    {data.answerAnalysis.insights.map((i:any, idx:any) => (
                       <li key={idx}>{i}</li>
                     ))}
                   </ul>
@@ -316,7 +316,7 @@ export default function InterviewReport({ report }: { report?: any }) {
                   Rationale
                 </h4>
                 <ul className="list-disc list-inside text-sm text-slate-300 mt-2 space-y-1">
-                  {data.summaryAndNextSteps.rationale.map((r, idx) => (
+                  {data.summaryAndNextSteps.rationale.map((r:any, idx:any) => (
                     <li key={idx}>{r}</li>
                   ))}
                 </ul>
@@ -326,7 +326,7 @@ export default function InterviewReport({ report }: { report?: any }) {
                 </h4>
                 <ul className="list-disc list-inside text-sm text-slate-300 mt-2 space-y-1">
                   {data.summaryAndNextSteps.actionableNextSteps.map(
-                    (a, idx) => (
+                    (a:any, idx:any) => (
                       <li key={idx}>{a}</li>
                     )
                   )}

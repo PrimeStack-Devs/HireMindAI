@@ -9,6 +9,7 @@ const page = () => {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [roadmap, setRoadmap] = useState<string | null>(null);
+  const [roadmapClicked , setRoadmapClicked] = useState(false)
 
   useEffect(() => {
     const item = window.localStorage.getItem("roadmap");
@@ -148,10 +149,11 @@ const page = () => {
                             ""
                           )}
                           <Button
-                            className=" cursor-pointer"
+                            className={`  ${roadmapClicked?'cursor-not-allowed':'cursor-pointer'}`}
                             onClick={() => {
                               window.localStorage.removeItem("roadmap");
                               router.push("/roadmap");
+                              setRoadmapClicked(true);
                             }}
                           >
                             Generate New

@@ -33,6 +33,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const [showStartModal, setShowStartModal] = useState(true);
 
   // ✅ mute state
+  // const [isChatLoading, setIsChatLoading] = useState(false);
   const [muted, setMuted] = useState(false);
 
   const router = useRouter();
@@ -73,9 +74,8 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const toggleMute = () => {
     setMuted((prev) => {
       const next = !prev;
-
       if (next) {
-        // Muting => stop immediately
+       terminateAudio();
         stop();
         setAiSpeaking(false);
         setIsSpeechLoading(false);
@@ -88,15 +88,16 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     });
   };
 
-  const { sendMessage } = useChat({
-    messages,
-    setMessages,
-    setAiSpeaking,
-    setIsInterviewCompleted,
+const { sendMessage, isLoading: isChatLoading } = useChat({
+  messages,
+  setMessages,
+  setAiSpeaking,
+  setIsInterviewCompleted,
+  generateSpeech: muted ? async () => { } : generateSpeech,
+  terminateAudio, // ✅ ADD THIS
+});
 
-    // ✅ block speech when muted
-    generateSpeech: muted ? async () => { } : generateSpeech,
-  });
+
 
   const { data, isLoading } = useStrapi("interviews", {
     populate: "*",
@@ -315,7 +316,8 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
 
               <InterviewChatPane
                 messages={messages}
-                isSpeechLoading={!muted && (isSpeechLoading || aiSpeaking)}
+               isSpeechLoading={isChatLoading}
+
                 setMessages={setMessages}
                 mode={interviewData?.[0]?.mode }
               />
@@ -324,17 +326,18 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
             <Card className="p-4 flex items-center justify-center">
               {!isInterviewCompleted ? (
                 <InterviewControls
-                  aiSpeaking={!muted && (isSpeechLoading || isPlaying || aiSpeaking)}
+                  aiSpeaking={ aiSpeaking}
                   mode={mode}
                   listening={listening}
                   text={text}
                   setMode={setMode}
                   setListening={setListening}
                   setText={setText}
+                  terminateAudio={terminateAudio}
                   handleSend={async (c) => {
                     await sendMessage({ content: c, interviewDetails });
 
-                    if (!muted) setIsSpeechLoading(true);
+                    // if (!muted) setIsSpeechLoading(true);
 
                     setText("");
                   }}

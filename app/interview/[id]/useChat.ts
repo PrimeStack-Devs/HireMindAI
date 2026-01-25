@@ -6,7 +6,8 @@ export function useChat({
   setMessages = () => {},
   setAiSpeaking = () => {},
   setIsInterviewCompleted = () => {},
-  generateSpeech = () => {}, // TTS function
+  generateSpeech = () => {},
+   terminateAudio = () => {}, // TTS function
 }: any) {
   const [isLoading, setIsLoading] = useState(false);
   
@@ -41,8 +42,8 @@ const sendMessage = useCallback(
       content: Array.isArray(content) ? [...content] : content.trim(),
       timestamp: new Date(),
     };
-
     setMessages((prev: any) => [...prev, userMessage]);
+    terminateAudio(); // ✅ stop old speech instantly
     setIsLoading(true);
     setAiSpeaking(true);
 
@@ -101,7 +102,8 @@ const sendMessage = useCallback(
       setAiSpeaking(false);
     }
   },
-  [messages, setMessages]
+  [messages, setMessages, generateSpeech, terminateAudio]
+
 );
 
   // const sendMessage = useCallback(

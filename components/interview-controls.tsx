@@ -15,6 +15,7 @@ export default function InterviewControls({
   setListening,
   setText,
   handleSend,
+  terminateAudio
 }: {
   aiSpeaking: boolean;
   mode: "voice" | "text";
@@ -24,6 +25,7 @@ export default function InterviewControls({
   setListening: (listening: boolean | ((prev: boolean) => boolean)) => void;
   setText: (text: string) => void;
   handleSend: (text: string) => void;
+  terminateAudio: () => void;
 }) {
   const recognitionRef = useRef<any>(null);
 
@@ -67,30 +69,30 @@ export default function InterviewControls({
     recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
- recognition.onresult = (event: any) => {
-  let finalText = "";
-  let interimText = "";
+    recognition.onresult = (event: any) => {
+      let finalText = "";
+      let interimText = "";
 
-  // ✅ rebuild complete transcript from scratch every time
-  for (let i = 0; i < event.results.length; i++) {
-    const result = event.results[i];
-    const spokenText = result[0]?.transcript || "";
+      // ✅ rebuild complete transcript from scratch every time
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        const spokenText = result[0]?.transcript || "";
 
-    if (result.isFinal) {
-      finalText += spokenText + " ";
-    } else {
-      interimText += spokenText + " ";
-    }
-  }
+        if (result.isFinal) {
+          finalText += spokenText + " ";
+        } else {
+          interimText += spokenText + " ";
+        }
+      }
 
-  const merged = (finalText + interimText).replace(/\s+/g, " ").trim();
+      const merged = (finalText + interimText).replace(/\s+/g, " ").trim();
 
-  // ✅ keep refs updated
-  finalTranscriptRef.current = finalText.replace(/\s+/g, " ").trim() + " ";
-  lastFinalIndexRef.current = event.results.length - 1;
+      // ✅ keep refs updated
+      finalTranscriptRef.current = finalText.replace(/\s+/g, " ").trim() + " ";
+      lastFinalIndexRef.current = event.results.length - 1;
 
-  setText(merged);
-};
+      setText(merged);
+    };
 
 
 
@@ -108,7 +110,7 @@ export default function InterviewControls({
       if (listening && !manuallyStoppedRef.current) {
         try {
           recognition.start();
-        } catch {}
+        } catch { }
       }
     };
 
@@ -117,7 +119,7 @@ export default function InterviewControls({
     return () => {
       try {
         recognition.stop();
-      } catch {}
+      } catch { }
       recognitionRef.current = null;
     };
   }, [setListening, setText]);
@@ -138,13 +140,13 @@ export default function InterviewControls({
 
       try {
         recognition.start();
-      } catch {}
+      } catch { }
     } else {
       manuallyStoppedRef.current = true;
 
       try {
         recognition.stop();
-      } catch {}
+      } catch { }
     }
   }, [listening, text]);
 
@@ -247,10 +249,9 @@ export default function InterviewControls({
               type="button"
               onClick={() => setListening((s) => !s)}
               className={`h-10 w-10 flex items-center justify-center rounded-md border transition
-                ${
-                  listening
-                    ? "bg-red-500 text-white border-red-500"
-                    : "bg-background text-foreground border-border hover:bg-muted"
+                ${listening
+                  ? "bg-red-500 text-white border-red-500"
+                  : "bg-background text-foreground border-border hover:bg-muted"
                 }`}
               title={listening ? "Stop Mic" : "Start Mic"}
               aria-label={listening ? "Stop Mic" : "Start Mic"}
@@ -264,17 +265,15 @@ export default function InterviewControls({
               disabled={!text?.trim()}
               onClick={() => {
                 if (!text.trim()) return;
-
+                terminateAudio();
                 setListening(false);
                 handleSend(text.trim());
-
                 handleClear();
               }}
               className={`h-10 w-10 flex items-center justify-center rounded-md border transition
-                ${
-                  text?.trim()
-                    ? "bg-primary text-primary-foreground border-primary hover:opacity-90"
-                    : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-border"
+                ${text?.trim()
+                  ? "bg-primary text-primary-foreground border-primary hover:opacity-90"
+                  : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-border"
                 }`}
               title="Send"
               aria-label="Send"
@@ -283,7 +282,7 @@ export default function InterviewControls({
             </button>
           </div>
 
-        
+
         </div>
       )}
     </div>

@@ -4,105 +4,159 @@ export async function POST(req: Request) {
 
     const model = "mistral";
 
-    const systemPrompt = `
- You are a Professional AI Roadmap Generator.
+//     const systemPrompt = `
+//  You are a Professional AI Roadmap Generator.
+
+// Your job is to generate a learning roadmap ONLY in strict raw JSON format.
+// No explanations, no markdown, no comments, no extra characters.
+// The final output must be valid JSON and must be treated as the file content of "roadmap.json".
+
+// 📋 Input Parameters:
+// - Job Role: ${roadmapDetails?.jobRole}
+// - Required Skills: ${roadmapDetails?.skills}
+// - Duration in Months: ${roadmapDetails?.duration || 6}
+
+// ✅ Output Rules (IMPORTANT):
+// - Output MUST be valid JSON ONLY.
+// - Do NOT wrap response in backticks.
+// - Do NOT add markdown.
+// - Do NOT add any text outside the JSON object.
+// - No trailing commas, no extra whitespace, no extra line breaks.
+// - Follow the EXACT JSON structure shown below.
+// - DO NOT change key names or structure.
+// - DO NOT remove or add sections.
+
+// ✅ JSON STRUCTURE YOU MUST ALWAYS FOLLOW:
+
+// {
+// "title":"Job title",
+//   "1. Job Role Overview": "job role overview",
+
+//   "2. Skills Breakdown": {
+//     "SkillName": "skill details",
+//     "SkillName2": "skill details"
+//   },
+
+//   "3. Month-by-Month Roadmap": {
+//     "Month 1": {
+//       "Topics": ["topics"],
+//       "Resources": [
+//        "resource name and details"
+//       ],
+//       "Tasks": ["tasks"]
+//     },
+//     "Month 2": {
+//       "Topics": ["topics"],
+//       "Resources": [
+//         "resource name and details"
+//       ],
+//       "Tasks": ["tasks"]
+//     },
+//     "Month 3": {
+//       "Topics": ["topics"],
+//       "Resources": [
+//         "resource name and details"
+//       ],
+//       "Tasks": ["tasks"]
+//     }
+//   },
+
+//   "4. Learning Resources": {
+//     "Books": [
+//       "book name and details"
+//     ],
+//     "Online Courses": [
+//       "course name and details"
+//     ],
+//     "Documentation": [
+//       "documentation name and details"
+//     ],
+//     "Youtube Tutorials": [
+//       "find tutorial or video on youtube and give name here and details"
+//     ]
+//   },
+
+//   "5. Capstone Project": {
+//     "Project Idea": "project idea",
+//     "Features": ["features"],
+//     "Technologies": ["technologies"]
+//   },
+
+//   "6. Extra Tips": {
+//     "Community": "community details",
+//     "Practice": "practice details",
+//     "Networking": "networking details"
+//   }
+// }
+
+// ✅ JSON Formatting Rules:
+// - Use minified JSON (compact JSON — no pretty formatting).
+// - Values must always be strings, arrays, or objects.
+// - Handle edge cases:
+//   - Missing skills → return empty object {} for Skills Breakdown.
+//   - Missing duration → default to 1 month.
+//   - Duration > 6 → generate additional months based on pattern.
+//   - Sanitize invalid characters automatically.
+
+// ✅ File Name:
+// roadmap.json
+
+// Now generate the roadmap in STRICT raw JSON:
+// `;
+
+const systemPrompt = `
+You are a Professional AI Roadmap Generator.
 
 Your job is to generate a learning roadmap ONLY in strict raw JSON format.
 No explanations, no markdown, no comments, no extra characters.
-The final output must be valid JSON and must be treated as the file content of "roadmap.json".
 
 📋 Input Parameters:
 - Job Role: ${roadmapDetails?.jobRole}
 - Required Skills: ${roadmapDetails?.skills}
 - Duration in Months: ${roadmapDetails?.duration || 6}
 
-✅ Output Rules (IMPORTANT):
+✅ Output Rules:
 - Output MUST be valid JSON ONLY.
-- Do NOT wrap response in backticks.
-- Do NOT add markdown.
-- Do NOT add any text outside the JSON object.
-- No trailing commas, no extra whitespace, no extra line breaks.
-- Follow the EXACT JSON structure shown below.
-- DO NOT change key names or structure.
-- DO NOT remove or add sections.
+- No markdown, no backticks, no extra text.
+- Follow the EXACT JSON structure below.
+
+✅ LINK RULE (MANDATORY):
+- For every resource name inside "Resources", you MUST also include its clickable link inside "Resources-link".
+- Both arrays MUST match in length and order.
+- Links MUST start with "https://".
+- If official link is unknown, use Google search link:
+  https://www.google.com/search?q=RESOURCE_NAME
 
 ✅ JSON STRUCTURE YOU MUST ALWAYS FOLLOW:
-
 {
 "title":"Job title",
-  "1. Job Role Overview": "job role overview",
-
-  "2. Skills Breakdown": {
-    "SkillName": "skill details",
-    "SkillName2": "skill details"
-  },
-
-  "3. Month-by-Month Roadmap": {
-    "Month 1": {
-      "Topics": ["topics"],
-      "Resources": [
-       "resource name and details"
-      ],
-      "Tasks": ["tasks"]
-    },
-    "Month 2": {
-      "Topics": ["topics"],
-      "Resources": [
-        "resource name and details"
-      ],
-      "Tasks": ["tasks"]
-    },
-    "Month 3": {
-      "Topics": ["topics"],
-      "Resources": [
-        "resource name and details"
-      ],
-      "Tasks": ["tasks"]
-    }
-  },
-
-  "4. Learning Resources": {
-    "Books": [
-      "book name and details"
-    ],
-    "Online Courses": [
-      "course name and details"
-    ],
-    "Documentation": [
-      "documentation name and details"
-    ],
-    "Youtube Tutorials": [
-      "find tutorial or video on youtube and give name here and details"
-    ]
-  },
-
-  "5. Capstone Project": {
-    "Project Idea": "project idea",
-    "Features": ["features"],
-    "Technologies": ["technologies"]
-  },
-
-  "6. Extra Tips": {
-    "Community": "community details",
-    "Practice": "practice details",
-    "Networking": "networking details"
-  }
+"1. Job Role Overview":"job role overview",
+"2. Skills Breakdown":{"SkillName":"skill details"},
+"3. Month-by-Month Roadmap":{
+"Month 1":{"Topics":["topics"],"Resources":["resource full name"],"Resources-link":["resource full name - https://link.com"],"Tasks":["tasks"]},
+"Month 2":{"Topics":["topics"],"Resources":["resource full name"],"Resources-link":["resource full name - https://link.com"],"Tasks":["tasks"]},
+"Month 3":{"Topics":["topics"],"Resources":["resource full name"],"Resources-link":["resource full name - https://link.com"],"Tasks":["tasks"]}
+},
+"4. Learning Resources":{
+"Books":["book full name"],
+"Books-link":["book full name - https://link.com"],
+"Online Courses":["course full name"],
+"Online Courses-link":["course full name - https://link.com"],
+"Documentation":["documentation full name"],
+"Documentation-link":["documentation full name - https://link.com"],
+"Youtube Tutorials":["youtube full name"],
+"Youtube Tutorials-link":["youtube full name - https://link.com"]
+},
+"5. Capstone Project":{"Project Idea":"project idea","Features":["features"],"Technologies":["technologies"]},
+"6. Extra Tips":{"Community":"community details","Practice":"practice details","Networking":"networking details"}
 }
 
-✅ JSON Formatting Rules:
-- Use minified JSON (compact JSON — no pretty formatting).
-- Values must always be strings, arrays, or objects.
-- Handle edge cases:
-  - Missing skills → return empty object {} for Skills Breakdown.
-  - Missing duration → default to 1 month.
-  - Duration > 6 → generate additional months based on pattern.
-  - Sanitize invalid characters automatically.
-
-✅ File Name:
-roadmap.json
+✅ Formatting:
+- Use minified JSON only.
 
 Now generate the roadmap in STRICT raw JSON:
 `;
+
 
     const API_URI = "https://text.pollinations.ai/openai";
     const response = await fetch(API_URI, {

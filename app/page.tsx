@@ -125,6 +125,22 @@ export default function HomePage() {
                 desc: "Enjoy smooth interaction, built for speed and precision using Next.js and AI APIs.",
                 icon: "⚡",
               },
+              {
+                title: "AI Roadmap Generation",
+                desc: "Get a personalized learning roadmap based on your role, skill level, and career goals — step-by-step.",
+                icon: "🗺️",
+              },
+              {
+                title: "Resume Analysis",
+                desc: "Upload your resume and get AI-powered feedback, ATS optimization tips, and improvements to stand out.",
+                icon: "📄",
+              },
+              {
+                title: "Find Jobs Instantly",
+                desc: "Discover fresh job openings matched to your skills and target role — updated regularly for faster applications.",
+                icon: "💼",
+              },
+
             ].map((feature, i) => (
               <motion.div
                 key={feature.title}

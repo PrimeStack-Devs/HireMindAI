@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import InterviewReport from "./ReportUi";
+import { set } from "date-fns";
+import { LoaderCircle } from "lucide-react";
 
 export default function ReportsPage() {
   const { data: user } = useSession<any>();
@@ -27,6 +29,8 @@ export default function ReportsPage() {
   console.log("data", data)
 
   const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [analyzingId, setAnalyzingId] = useState<string | number | null>(null);
+
 
   const handleAnalyseResume = ({ url }: { url: string }) => {
     if (!url) {
@@ -52,8 +56,9 @@ export default function ReportsPage() {
 
   if (isLoading)
     return (
-      <div className="flex justify-center items-center h-screen text-gray-400">
-        Loading interview reports...
+      <div className="flex justify-center items-center h-screen text-gray-400  flex-col gap-10">
+        <LoaderCircle className=" w-10 h-10 animate-spin" />
+        Loading interview reports
       </div>
     );
   if (error)
@@ -108,6 +113,9 @@ export default function ReportsPage() {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {interviews.map((interview, idx) => (
+                interview.report &&
+
+
                 <motion.div
                   key={interview.id || idx}
                   initial={{ opacity: 0, y: 15 }}
@@ -164,8 +172,8 @@ export default function ReportsPage() {
 
                         </p>
                         <p className="col-span-2">
- <span className="font-medium text-gray-300">Date:</span>{" "}
-                        {formatDateTime(interview.createdAt)}
+                          <span className="font-medium text-gray-300">Date:</span>{" "}
+                          {formatDateTime(interview.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -190,6 +198,7 @@ export default function ReportsPage() {
                                 ? JSON.parse(interview.report)
                                 : interview.report;
                             setSelectedReport(parsed);
+                            console.log("report", parsed)
                           } catch {
                             alert("Invalid report format");
                           }
@@ -219,24 +228,36 @@ export default function ReportsPage() {
                         {interview?.resume && (
                           <Button
                             variant="secondary"
-                            className="
-              flex-1 border border-gray-600 text-gray-200 
-              bg-transparent hover:bg-gray-800/60 
-              hover:border-indigo-500/70
-              rounded-lg py-2.5 
-              transition-all duration-300
-            "
-                            onClick={() =>
-                              handleAnalyseResume({ url: interview.resume })
-                            }
+                            disabled={analyzingId === interview.id}
+                            className={`
+      flex-1 border border-gray-600
+      bg-transparent hover:bg-gray-800/60 
+      hover:border-indigo-500/70
+      rounded-lg py-2.5 
+      transition-all duration-300
+      ${analyzingId === interview.id
+                                ? "cursor-not-allowed text-gray-300 "
+                                : "text-gray-200"
+                              }
+    `}
+                            onClick={() => {
+                              setAnalyzingId(interview.id); // ✅ only this card loading
+                              handleAnalyseResume({ url: interview.resume });
+                            }}
                           >
-                            Analyze Resume
+                            {analyzingId === interview.id ? <span className="flex items-center gap-2">
+                              Analyzing...
+                              <LoaderCircle className="h-4 w-4 animate-spin" />
+                            </span> : "Analyze Resume"}
                           </Button>
                         )}
+
                       </div>
                     </div>
                   </Card>
                 </motion.div>
+
+
               ))}
             </motion.div>
           )}

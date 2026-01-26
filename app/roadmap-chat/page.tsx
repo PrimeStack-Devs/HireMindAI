@@ -1,15 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Eye, MapPin, MessageSquare } from "lucide-react";
+import { ArrowRight, Eye, MapPin, MessageSquare, BriefcaseBusiness } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
- 
+
 const page = () => {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [roadmap, setRoadmap] = useState<string | null>(null);
-  const [roadmapClicked , setRoadmapClicked] = useState(false)
+  const [roadmapClicked, setRoadmapClicked] = useState(false)
 
   useEffect(() => {
     const item = window.localStorage.getItem("roadmap");
@@ -46,6 +46,16 @@ const page = () => {
       hoverGradient: "from-purple-600 to-pink-600",
       href: "/chat",
     },
+    {
+      id: "job",
+      title: "Find-Job",
+      description:
+        "Discover job opportunities tailored to your skills and preferences",
+      icon: BriefcaseBusiness,
+      gradient: "from-orange-500 to-amber-500",
+      hoverGradient: "from-orange-600 to-amber-600",
+      href: "/find-job",
+    },
   ];
 
   return (
@@ -62,7 +72,7 @@ const page = () => {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 gap-6">
           {cards.map((card) => {
             const Icon = card.icon;
             const isHovered = hoveredCard === card.id;
@@ -74,24 +84,22 @@ const page = () => {
                 onMouseLeave={() => setHoveredCard(null)}
                 className="group relative cursor-pointer"
                 onClick={() => {
-                  card.id == "chat" || card.id == "interview"
+                  card.id == "chat" || card.id == "interview" || card.id == "job"
                     ? router.push(card.href)
                     : "";
                 }}
               >
                 <div
-                  className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10 ${
-                    isHovered ? `bg-gradient-to-r ${card.hoverGradient}` : ""
-                  }`}
+                  className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10 ${isHovered ? `bg-gradient-to-r ${card.hoverGradient}` : ""
+                    }`}
                 />
 
                 {/* Card Container */}
                 <div
                   className={`relative h-full bg-slate-800/50 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 transition-all duration-300 overflow-hidden
-                    ${
-                      isHovered
-                        ? "border-slate-500 shadow-2xl transform scale-105"
-                        : "hover:border-slate-600"
+                    ${isHovered
+                      ? "border-slate-500 shadow-2xl transform scale-105"
+                      : "hover:border-slate-600"
                     }
                   `}
                 >
@@ -104,9 +112,8 @@ const page = () => {
                   <div className="relative z-10 flex flex-col h-full">
                     {/* Icon Container */}
                     <div
-                      className={`inline-flex w-fit mb-6 p-3 rounded-lg bg-gradient-to-r ${
-                        card.gradient
-                      } 
+                      className={`inline-flex w-fit mb-6 p-3 rounded-lg bg-gradient-to-r ${card.gradient
+                        } 
                         transform transition-all duration-300
                         ${isHovered ? "scale-110 shadow-lg" : "scale-100"}
                       `}
@@ -127,29 +134,28 @@ const page = () => {
                     {/* CTA with Arrow */}
                     <div
                       className={`inline-flex items-center gap-2 text-sm font-semibold transition-all duration-300 group/cta
-                        ${
-                          isHovered
-                            ? "text-white translate-x-0"
-                            : "text-slate-300 -translate-x-1"
+                        ${isHovered
+                          ? "text-white translate-x-0"
+                          : "text-slate-300 -translate-x-1"
                         }
                       `}
                     >
                       {card.id == "chat" ? (
-                        <span>Learn More</span>
+                        <>
+                          <span>Learn More</span>
+                          {/* <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-2" /> */}
+                        </>
                       ) : card.id == "roadmap" ? (
-                        <div className="flex gap-2 ">
+                        <div className="flex gap-2">
                           {roadmap ? (
-                            <Button
-                              className=" cursor-pointer"
-                              onClick={() => router.push("/roadmap")}
-                            >
+                            <Button className="cursor-pointer" onClick={() => router.push("/roadmap")}>
                               View Previous
                             </Button>
                           ) : (
                             ""
                           )}
                           <Button
-                            className={`  ${roadmapClicked?'cursor-not-allowed':'cursor-pointer'}`}
+                            className={`${roadmapClicked ? "cursor-not-allowed" : "cursor-pointer"}`}
                             onClick={() => {
                               window.localStorage.removeItem("roadmap");
                               router.push("/roadmap");
@@ -159,14 +165,18 @@ const page = () => {
                             Generate New
                           </Button>
                         </div>
+                      ) : card.id == "job" ? (
+                        <>
+                          <span>Find-Job</span>
+                          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-2" />
+                        </>
                       ) : (
                         <>
                           <span>Get Started</span>
-                          <ArrowRight
-                            className={`w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-2`}
-                          />
+                          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-2" />
                         </>
                       )}
+
 
                       {card.id == "chat" ? (
                         <ArrowRight
@@ -180,9 +190,8 @@ const page = () => {
 
                   {/* Hover border accent */}
                   <div
-                    className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${
-                      card.gradient
-                    } 
+                    className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${card.gradient
+                      } 
                       transform transition-all duration-300 origin-left
                       ${isHovered ? "scale-x-100" : "scale-x-0"}
                     `}

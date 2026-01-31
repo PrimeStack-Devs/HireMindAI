@@ -36,9 +36,9 @@ export async function POST(req: Request) {
 
         if (!elevenRes.ok || !elevenRes.body) {
             const errorText = await elevenRes.text();
-            console.error("❌ ElevenLabs error:", errorText);
+            // console.error("❌ ElevenLabs error:", errorText);
             return NextResponse.json(
-                { error: "Failed to generate speech" },
+                { error: "Failed to generate speech: " + errorText },
                 { status: 500 }
             );
         }

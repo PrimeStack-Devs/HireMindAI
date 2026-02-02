@@ -34,7 +34,7 @@ export default function SignupFormDemo() {
         toast.error("Invalid Email or Password");
       }
     } catch (error) {
-      console.log("Login Error", error);
+      // console.log("Login Error", error);
       toast.error("Something went wrong");
     } finally {
       setLoading(false);

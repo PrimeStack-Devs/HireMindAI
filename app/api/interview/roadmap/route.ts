@@ -172,7 +172,7 @@ Now generate the roadmap in STRICT raw JSON:
     });
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
     const roadmap =
       data?.choices?.[0]?.message?.content || "No roadmap generated.";
 
@@ -181,7 +181,7 @@ Now generate the roadmap in STRICT raw JSON:
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.log("Report generation error:", error);
+    // console.log("Report generation error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to generate roadmap" }),
       {

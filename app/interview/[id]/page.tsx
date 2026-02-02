@@ -134,7 +134,7 @@ const { sendMessage, isLoading: isChatLoading } = useChat({
 
       await sendMessage({ content, interviewDetails });
     } catch (error) {
-      console.log("Initial greeting failed", error);
+      // console.log("Initial greeting failed", error);
     }
   };
 

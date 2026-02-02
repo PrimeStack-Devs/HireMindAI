@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     const model = "openai-fast";
 
-    console.log("Interview Details:", interviewDetails);
+    // console.log("Interview Details:", interviewDetails);
 
     const {
       mode: interviewMode,
@@ -291,7 +291,7 @@ Interview is completed, please generate report.
     });
 
     if (!upstreamResponse.ok || !upstreamResponse.body) {
-      console.log(upstreamResponse);
+      // console.log(upstreamResponse);
       return new Response("Upstream failed", { status: 502 });
     }
 
@@ -334,7 +334,7 @@ Interview is completed, please generate report.
     //   },
     // });
   } catch (error) {
-    console.log("API Error:", error);
+    // console.log("API Error:", error);
     return Response.json(
       { error: "Ohh there's something wrong, try again!" },
       { status: 500 }

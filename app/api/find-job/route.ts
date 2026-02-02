@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         }
 
         const data = await joobleResponse.json();
-        console.log("Jooble API Response:", data);
+        // console.log("Jooble API Response:", data);
 
   
         return NextResponse.json({

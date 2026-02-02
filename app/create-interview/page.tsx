@@ -102,18 +102,18 @@ toast.success(
     try {
       aiData = JSON.parse(raw);
     } catch (e) {
-      console.log("Resume extractor raw response:", raw);
+      // console.log("Resume extractor raw response:", raw);
       toast.error("Resume analysis failed (invalid JSON response)");
       return;
     }
 
     if (aiData?.error) {
-      console.log("Resume extractor error:", aiData);
+      // console.log("Resume extractor error:", aiData);
       toast.error(aiData.error);
       return;
     }
 
-    console.log("AI Resume Extraction:", aiData);
+    // console.log("AI Resume Extraction:", aiData);
 
     setCandidateName(aiData.candidateName || "");
     setSkills(aiData.skills || "");

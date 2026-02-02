@@ -47,7 +47,7 @@ export default function SignupFormDemo() {
         }
       }
     } catch (error: any) {
-      console.log("Login Error", error);
+      // console.log("Login Error", error);
       toast.error(error?.error?.message || "Something went wrong");
     } finally {
       setLoading(false);

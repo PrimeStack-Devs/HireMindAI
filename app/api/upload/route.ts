@@ -23,8 +23,8 @@ export async function POST(req: Request) {
       // ✅ 100% correct preview image URL (page 1 PNG)
       const previewImageUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/pg_1,f_png/v${pdfUpload.version}/${pdfUpload.public_id}.png`;
 
-      console.log("PDF URL:", pdfUpload.secure_url);
-      console.log("PREVIEW IMAGE URL:", previewImageUrl);
+      // console.log("PDF URL:", pdfUpload.secure_url);
+      // console.log("PREVIEW IMAGE URL:", previewImageUrl);
 
       return NextResponse.json({
         result: previewImageUrl, // ✅ always image

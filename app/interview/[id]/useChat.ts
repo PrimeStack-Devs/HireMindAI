@@ -74,7 +74,7 @@ const sendMessage = useCallback(
       const data = await response.json();
       const aiContent = data?.content?.result || "";
 
-      console.log("AI Response Content:", data);
+      // console.log("AI Response Content:", data);
 
       const aiMessage = {
         id: crypto.randomUUID(),

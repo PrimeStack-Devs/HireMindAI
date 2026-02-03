@@ -73,8 +73,9 @@ export async function POST(req: Request) {
         "X-Title": "VOID AI",
       },
       body: JSON.stringify({
-        model: "mistral",
-        stream: isStream || false,
+        model: model || "mistral",
+        // stream: isStream || false,
+        stream:  false,
         messages: [systemtPrompt, ...messages],
       }),
     });

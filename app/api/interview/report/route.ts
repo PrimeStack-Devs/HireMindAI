@@ -3,7 +3,7 @@ export async function POST(req: Request) {
     const { messages, interviewDetails, faceMeshFeedback } = await req.json();
 
     const model = "mistral";
-const systemPrompt = `
+    const systemPrompt = `
 You are an expert AI recruiter and evaluation system.
 
 Your task: Generate a **structured interview report strictly in RAW JSON format**.
@@ -81,32 +81,32 @@ Return **only** the JSON in the exact structure above.
 
     const API_URI = "https://text.pollinations.ai/openai";
 
-  //   const response = await fetch(API_URI, {
-  //     method: "POST",
-  //     headers: {
-  //       Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       model,
-  //       messages: [
-  //         { role: "system", content: systemPrompt },
-  //         {
-  //           role: "user",
-  //           content: JSON.stringify({
-  //             candidateName: interviewDetails?.username || "N/A",
-  //             interviewDetails,
-  //             messages,
-  //             facialAnalytics: faceMeshFeedback,
-  //           }),
-  //         },
-  //       ],
-  //     }),
-  //   });
+    //   const response = await fetch(API_URI, {
+    //     method: "POST",
+    //     headers: {
+    //       Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       model,
+    //       messages: [
+    //         { role: "system", content: systemPrompt },
+    //         {
+    //           role: "user",
+    //           content: JSON.stringify({
+    //             candidateName: interviewDetails?.username || "N/A",
+    //             interviewDetails,
+    //             messages,
+    //             facialAnalytics: faceMeshFeedback,
+    //           }),
+    //         },
+    //       ],
+    //     }),
+    //   });
 
-  //   const data = await response.json();
+    //   const data = await response.json();
 
-  // let content = data?.choices?.[0]?.message?.content?.trim() || "";
+    // let content = data?.choices?.[0]?.message?.content?.trim() || "";
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -124,7 +124,15 @@ Return **only** the JSON in the exact structure above.
             role: "system",
             content: systemPrompt,
           },
-          ...messages,
+          {
+            role: "user",
+            content: JSON.stringify({
+              candidateName: interviewDetails?.username || "N/A",
+              interviewDetails,
+              messages,
+              facialAnalytics: faceMeshFeedback,
+            }),
+          },
         ],
       }),
     });
@@ -138,11 +146,11 @@ Return **only** the JSON in the exact structure above.
     let content = data.choices[0].message.content;
 
 
-if (content.startsWith("```")) {
-  content = content.replace(/```json\s*|\s*```/g, "").trim();
-}
+    if (content.startsWith("```")) {
+      content = content.replace(/```json\s*|\s*```/g, "").trim();
+    }
 
-      // console.log("Generated Report:", content);
+    // console.log("Generated Report:", content);
     return new Response(content, {
       status: 200,
       headers: { "Content-Type": "application/json" },

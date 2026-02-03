@@ -111,7 +111,7 @@ if (content.startsWith("```")) {
   content = content.replace(/```json\s*|\s*```/g, "").trim();
 }
 
-      console.log("Generated Report:", content);
+      // console.log("Generated Report:", content);
     return new Response(content, {
       status: 200,
       headers: { "Content-Type": "application/json" },

@@ -60,7 +60,7 @@ const page = () => {
 
   return (
     <main className="min-h-screen bg-transparent flex items-center justify-center p-4">
-      <div className="w-full mt-10 max-w-[80vw]">
+      <div className="w-full mt-25 max-w-[80vw]">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">

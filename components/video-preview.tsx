@@ -86,7 +86,7 @@ export default function EmotionAnalyzerPage({ startFn, stopFn, onTerminate }: an
   };
 
   const terminateInterview = () => {
-    console.log("terminateInterview called");
+    // console.log("terminateInterview called");
     if (terminatedRef.current) return;
     if (faceMeshRef.current) {
       faceMeshRef.current.onResults(() => { }); // detach callback
@@ -540,7 +540,7 @@ export default function EmotionAnalyzerPage({ startFn, stopFn, onTerminate }: an
         locateFile: (f: string) =>
           `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`,
       });
-      console.log("FaceMesh loaded:", faceMeshRef.current);
+      // console.log("FaceMesh loaded:", faceMeshRef.current);
       faceMeshRef.current.setOptions({
         maxNumFaces: 5,
         refineLandmarks: true,

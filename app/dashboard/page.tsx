@@ -53,6 +53,18 @@ export default function DashboardPage() {
 
   const { overview, charts, recentReports } = dashboard;
 
+const sortedReports = [...recentReports].sort((a, b) => {
+  const dateTimeA = new Date(`${a.date}T${a.time}`);
+  const dateTimeB = new Date(`${b.date}T${b.time}`);
+
+  return dateTimeB.getTime() - dateTimeA.getTime();
+});
+
+const formatTime12 = (date: string, time: string) =>
+  new Date(`${date}T${time}`).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+ 
+console.log('respwdehd',recentReports)
+
   return (
     <main className="min-h-screen pt-[100px] text-white px-4 sm:px-6 lg:px-10 py-10">
       {/* Title */}
@@ -169,13 +181,14 @@ export default function DashboardPage() {
         </h2>
 
         <div className="flex flex-col gap-4">
-          {recentReports.map((r: any, idx: number) => (
+          {sortedReports.filter((r: any) => r.summary && r.summary !== 'No summary available').map((r: any, idx: number) => (
             <motion.div
               key={r.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
             >
+             
               <Card className="p-4 sm:p-5 bg-gray-800/60 border border-gray-700 rounded-2xl hover:bg-gray-800 transition-all">
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-3">
                   <div>
@@ -186,7 +199,7 @@ export default function DashboardPage() {
                     <p className="mt-2 text-gray-300 text-sm sm:text-base">
                       {r.summary}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">Date: {r.date}</p>
+                    <p className="text-xs text-gray-500 mt-1"> Date: {r.date} || {formatTime12(r.date, r.time)}</p>
                   </div>
 
                   <div className="flex flex-col items-start md:items-end gap-1">

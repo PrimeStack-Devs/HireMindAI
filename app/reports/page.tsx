@@ -26,7 +26,7 @@ export default function ReportsPage() {
     sort: ["createdAt:desc"],
   });
 
-  console.log("data", data)
+  // console.log("data", data)
 
   const [selectedReport, setSelectedReport] = useState<any | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | number | null>(null);
@@ -198,7 +198,7 @@ export default function ReportsPage() {
                                 ? JSON.parse(interview.report)
                                 : interview.report;
                             setSelectedReport(parsed);
-                            console.log("report", parsed)
+                            // console.log("report", parsed)
                           } catch {
                             alert("Invalid report format");
                           }

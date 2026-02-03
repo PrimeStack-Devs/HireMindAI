@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     } = await req.json();
     // const lastMessage = messages[messages.length - 1]?.content || "";
 
-    console.log("Received messages:", personality, model, provider);
+    // console.log("Received messages:", personality, model, provider);
 
     // const imageKeywords = [
     //   "generate image",
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     });
 
     if (!upstreamResponse.ok || !upstreamResponse.body) {
-      console.log(upstreamResponse);
+      // console.log(upstreamResponse);
       return new Response("Upstream failed", { status: 502 });
     }
 

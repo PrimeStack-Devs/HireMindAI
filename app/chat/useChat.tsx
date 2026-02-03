@@ -94,7 +94,7 @@ export function useChat() {
 
         const contentType = response.headers.get("Content-Type") || "";
 
-        console.log("Response Content-Type:", contentType);
+        // console.log("Response Content-Type:", contentType);
 
         //  if (!contentType.includes("text/plain")) {
 

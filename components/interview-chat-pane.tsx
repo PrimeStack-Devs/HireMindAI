@@ -13,7 +13,7 @@ export default function InterviewChatPane({
   mode
 }: any) {
   const ref = useRef<HTMLDivElement | null>(null);
-  console.log(mode);
+  // console.log(mode);
   
   useEffect(() => {
     ref.current?.scrollTo({

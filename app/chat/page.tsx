@@ -274,11 +274,11 @@ const AIChat = memo(() => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [initialScroll, setInitialScroll] = useState(false);
   const params = useSearchParams();
-  console.log("Search Params:", params.toString());
+  // console.log("Search Params:", params.toString());
 
   useEffect(() => {
     const isTaskParam = params.get("task") || false;
-    console.log("isTaskParam:", isTaskParam);
+    // console.log("isTaskParam:", isTaskParam);
     if (isTaskParam === "true") {
       const task = localStorage.getItem("task");
       if (!task) return;

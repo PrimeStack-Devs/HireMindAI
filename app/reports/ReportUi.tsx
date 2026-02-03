@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 // Example `report` prop will be used if none is provided. Pass your parsed JSON as `report` prop.
 export default function InterviewReport({ report }: { report?: any }) {
   const data = report;
-console.log("request arrived ")
+// console.log("request arrived ")
   const scoreBars = [
     { name: "Technical", value: data.scores.technicalKnowledge },
     { name: "Communication", value: data.scores.communication },

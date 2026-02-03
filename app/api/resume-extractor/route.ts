@@ -21,21 +21,53 @@ Return ONLY valid JSON. No markdown. No extra text.
 `;
 
     const API_URI = "https://text.pollinations.ai/openai";
-    const response = await fetch(API_URI, {
+
+
+//     const response = await fetch(API_URI, {
+//       method: "POST",
+//       headers: {
+//         Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         model,
+//         messages: [{ role: "system", content: systemPrompt }, ...messages],
+//       }),
+//     });
+
+//     const data = await response.json();
+// // console.log("Pollinations Raw Response:", data);
+//     let content = data?.choices?.[0]?.message?.content?.trim() || "";
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": process.env.SITE_BASE_URL || "http://localhost:3000",
+        "X-Title": "HireMind AI Interviewer"
       },
       body: JSON.stringify({
-        model,
-        messages: [{ role: "system", content: systemPrompt }, ...messages],
+        model: "openai/gpt-4o-mini",
+        temperature: 0.7,
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          ...messages,
+        ],
       }),
     });
 
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`OpenRouter error: ${response.status} ${err}`);
+    }
+
     const data = await response.json();
-console.log("Pollinations Raw Response:", data);
-    let content = data?.choices?.[0]?.message?.content?.trim() || "";
+    const content = data.choices[0].message.content;
+
     const cleaned = content.replace(/```json/g, "").replace(/```/g, "").trim();
 
     // ✅ Must be JSON always

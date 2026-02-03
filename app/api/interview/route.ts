@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     const model = "openai-fast";
 
-    console.log("Interview Details:", interviewDetails);
+    // console.log("Interview Details:", interviewDetails);
 
     const {
       mode: interviewMode,
@@ -134,18 +134,49 @@ Interview is completed, please generate report.
     // console.log("-------------------")
     // console.log("-------------------")
 
-    const upstreamResponse = await fetch(API_URI, {
+    // const upstreamResponse = await fetch(API_URI, {
+    //   method: "POST",
+    //   headers: {
+    //     Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+    //     "Content-Type": "application/json",
+    //     "HTTP-Referer": `${process.env.SITE_BASE_URL}`,
+    //     "X-Title": "VOID AI",
+    //   },
+    //   body: JSON.stringify({
+    //     model: model || "openai",
+    //     // stream: isStream || false,
+    //     stream: false,
+    //     messages: [
+    //       {
+    //         role: "system",
+    //         content: systemPrompt,
+    //       },
+    //       ...messages,
+    //     ],
+    //   }),
+    // });
+    // console.log("Upstream Response Headers:", upstreamResponse);
+    // console.log("Upstream Response Status:", upstreamResponse.status);
+    // if (!upstreamResponse.ok || !upstreamResponse.body) {
+    //   // console.log(upstreamResponse);
+    //   return new Response("Upstream failed", { status: 502 });
+    // }
+
+    //  const data = await upstreamResponse.json();
+
+    // let content:any = {result:data?.choices?.[0]?.message?.content?.trim() || ""}
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": `${process.env.SITE_BASE_URL}`,
-        "X-Title": "VOID AI",
+        "HTTP-Referer": process.env.SITE_BASE_URL || "http://localhost:3000",
+        "X-Title": "HireMind AI Interviewer"
       },
       body: JSON.stringify({
-        model: model || "openai",
-        // stream: isStream || false,
-        stream: false,
+        model: "openai/gpt-4o-mini",
+        temperature: 0.7,
         messages: [
           {
             role: "system",
@@ -156,15 +187,15 @@ Interview is completed, please generate report.
       }),
     });
 
-    if (!upstreamResponse.ok || !upstreamResponse.body) {
-      console.log(upstreamResponse);
-      return new Response("Upstream failed", { status: 502 });
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`OpenRouter error: ${response.status} ${err}`);
     }
 
-     const data = await upstreamResponse.json();
-
-    let content:any = {result:data?.choices?.[0]?.message?.content?.trim() || ""}
-
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    
+    console.log("Interview AI Response:", content);
     return new Response(
   JSON.stringify({ content }),
   {

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     } = await req.json();
     // const lastMessage = messages[messages.length - 1]?.content || "";
 
-    console.log("Received messages:", personality, model, provider);
+    // console.log("Received messages:", personality, model, provider);
 
     // const imageKeywords = [
     //   "generate image",
@@ -64,23 +64,41 @@ export async function POST(req: Request) {
 
     // console.log(typeof API_URI)
 
-    const upstreamResponse = await fetch(API_URI, {
+    // const upstreamResponse = await fetch(API_URI, {
+    //   method: "POST",
+    //   headers: {
+    //     Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+    //     "Content-Type": "application/json",
+    //     "HTTP-Referer": `${process.env.SITE_BASE_URL}`,
+    //     "X-Title": "VOID AI",
+    //   },
+    //   body: JSON.stringify({
+    //     model: model || "mistral",
+    //     // stream: isStream || false,
+    //     stream:  false,
+    //     messages: [systemtPrompt, ...messages],
+    //   }),
+    // });
+
+
+    const upstreamResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": `${process.env.SITE_BASE_URL}`,
-        "X-Title": "VOID AI",
+        "HTTP-Referer": process.env.SITE_BASE_URL || "http://localhost:3000",
+        "X-Title": "HireMind AI Interviewer"
       },
       body: JSON.stringify({
-        model: "mistral",
+        model: "openai/gpt-4o-mini",
+        temperature: 0.7,
         stream: isStream || false,
         messages: [systemtPrompt, ...messages],
       }),
     });
 
     if (!upstreamResponse.ok || !upstreamResponse.body) {
-      console.log(upstreamResponse);
+      // console.log(upstreamResponse);
       return new Response("Upstream failed", { status: 502 });
     }
 

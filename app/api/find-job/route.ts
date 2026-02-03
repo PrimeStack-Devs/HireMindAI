@@ -81,12 +81,12 @@ export async function POST(req: NextRequest) {
     const {
       jobRole,
       skills = [],
-      location,
-      distance,
+      // location,
+      distance=100,
       country,
       page = 1,
       jobType = "full_time",  
-      // maxDaysOld = 30,
+      maxDaysOld = 30,
       resultsPerPage = 10,
     } = candidateDetails;
 
@@ -119,29 +119,29 @@ export async function POST(req: NextRequest) {
       results_per_page: resultsPerPage.toString(),
        
       what: [jobRole, ...skills].join(" "),
-      // max_days_old: maxDaysOld.toString(),
+      max_days_old: maxDaysOld.toString(),
     });
 
     
-    if (location) {
-      params.append("where", location);
+    // if (location) {
+    //   params.append("where", location);
 
       
-      if (distance && resolvedCountry !== "in") {
+      if (distance &&resolvedCountry !== "in") {
         params.append("distance", distance.toString());
       }
-    }
+    // }
 
  
     if (jobType === "full_time") params.append("full_time", "1");
     if (jobType === "part_time") params.append("part_time", "1");
     if (jobType === "contract") params.append("contract", "1");
     if (jobType === "permanent") params.append("permanent", "1");
-
+// console.log("params",params)
   
     const url = `https://api.adzuna.com/v1/api/jobs/${resolvedCountry}/search/${page}?${params}`;
     // console.log("Adzuna URL:", url);
-
+console.log("url",url)
     const res = await fetch(url);
     const text = await res.text();
 
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = JSON.parse(text);
-    console.log("Adzuna API Response:", data);
+    // console.log("Adzuna API Response:", data);
 
      
     const jobs = (data.results || []).map((job: any) => ({

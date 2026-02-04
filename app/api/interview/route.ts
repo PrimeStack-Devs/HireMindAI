@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     const model = "openai-fast";
 
-    // console.log("Interview Details:", interviewDetails);
+    console.log("Interview Details:", interviewDetails);
 
     const {
       mode: interviewMode,
@@ -107,9 +107,54 @@ MODE RULES:
   If wrong: correct them + give correct option + short explanation in 2-4 lines.
 - Then move to next question.
 
+
+STRICT MODE OVERRIDE RULE (VERY IMPORTANT):
+You MUST strictly follow ONLY the rules of the selected Mode.
+
+If Mode is Coding:
+- IGNORE HR MODE rules.
+- IGNORE TECHNICAL MODE rules.
+- ONLY follow CODING MODE rules.
+- Do NOT ask open-ended questions.
+- Do NOT ask conceptual questions.
+- Every question MUST be MCQ with a code snippet.
+
+If Mode is Technical:
+- IGNORE HR MODE rules.
+- IGNORE CODING MODE rules.
+
+If Mode is HR:
+- IGNORE TECHNICAL MODE rules.
+- IGNORE CODING MODE rules.
+
+3) CODING MODE (STRICT):
+- This mode is MCQ ONLY.
+- Every question MUST include a short code snippet.
+- The code snippet MUST be related to the given skills.
+- Ask exactly ONE question at a time.
+- Provide exactly 4 options labeled A, B, C, D.
+- The question MUST ask about output, behavior, or bug in the code.
+- The user MUST answer with only A, B, C, or D.
+
+AFTER USER ANSWERS:
+- If correct:
+  - Say "Correct."
+  - Give a short explanation in 2-3 lines.
+- If wrong:
+  - Say "Not quite."
+  - Mention the correct option.
+  - Give a short explanation in 2-4 lines.
+- Then move to the next numbered question.
+
 QUESTION PROGRESSION:
 - Start easy, then medium, then slightly challenging.
 - Always match the difficulty level: ${difficulty}
+
+QUESTION NUMBERING RULE (MANDATORY):
+- Every question MUST start with:
+Question X of ${numOfQuestions}
+- X must start from 1 and increment by 1 for each question.
+- Do NOT skip or repeat question numbers.
 
 INTERVIEW COMPLETION RULE:
 - After asking exactly ${numOfQuestions} questions, stop completely.

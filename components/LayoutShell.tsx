@@ -12,7 +12,8 @@ export default function LayoutShell({
   const pathname = usePathname()
 
   // true for /assessment and /assessment/*
-  const isAssessmentRoute = pathname.startsWith('/assessment')
+  const isAssessmentRoute = pathname.startsWith('/assessment') 
+  const isAdminRoute = pathname.startsWith('/admin')
 
   return (
     <>
@@ -35,7 +36,7 @@ export default function LayoutShell({
       )}
 
       {/* Navbar ONLY if not assessment */}
-      {!isAssessmentRoute && <Navbar />}
+      {!isAssessmentRoute && !isAdminRoute && <Navbar />}
 
       {children}
     </>

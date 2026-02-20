@@ -231,7 +231,7 @@ const meta = {
 const PRIMARY_BUTTON_BG = "bg-blue-600";
 const PRIMARY_BUTTON_TEXT = "text-white";
 const PRIMARY_BUTTON_HOVER_BG = "hover:bg-blue-700";
-const TEXT_GRADIENT = "from-blue-200 to-sky-400";
+const TEXT_GRADIENT = "from-blue-200 to-sky-400"; 
 const ACCENT_COLOR = "text-sky-400";
 
  

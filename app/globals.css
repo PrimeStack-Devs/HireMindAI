@@ -134,3 +134,29 @@
     0px 0px 0px 1px rgba(25, 28, 33, 0.08);
 }
  
+
+/* ================================
+   Disable scroll-wheel value change
+   for number inputs (GLOBAL)
+   ================================ */
+
+/* Chrome, Edge, Safari */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Prevent mouse wheel changing value */
+input[type="number"]:focus {
+  pointer-events: auto;
+}
+
+input[type="number"] {
+  scroll-behavior: auto;
+}

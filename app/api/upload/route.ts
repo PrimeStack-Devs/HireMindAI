@@ -16,25 +16,25 @@ export async function POST(req: Request) {
     const mimeType = file.type;
     const base64 = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
-    // ✅ PDF
+    // PDF
     if (mimeType === "application/pdf") {
       const pdfUpload = await uploadPdfAsImage(base64, file.name);
 
-      // ✅ 100% correct preview image URL (page 1 PNG)
+      //  100% correct preview image URL (page 1 PNG)
       const previewImageUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/pg_1,f_png/v${pdfUpload.version}/${pdfUpload.public_id}.png`;
 
       // console.log("PDF URL:", pdfUpload.secure_url);
       // console.log("PREVIEW IMAGE URL:", previewImageUrl);
 
       return NextResponse.json({
-        result: previewImageUrl, // ✅ always image
+        result: previewImageUrl, //  always image
         pdfUrl: pdfUpload.secure_url, // optional
         previewImageUrl,
         type: "pdf",
       });
     }
 
-    // ✅ Image
+    //  Image
     const imageUrl = await uploadImage(base64);
 
     return NextResponse.json({

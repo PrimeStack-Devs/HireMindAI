@@ -6,12 +6,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Controller, UseFormReturn } from 'react-hook-form'
 import * as z from 'zod'
- 
-const numberField = (msg: string) =>
-  z.preprocess(
-    (val) => (val === '' || val === null || Number.isNaN(val) ? undefined : val),
-    z.number({ required_error: msg }).min(1, msg)
-  )
+
+import { Editor } from 'primereact/editor';
+import { useState } from 'react'
+
+
 export const formSchema = z.object({
   name: z.string().min(1, 'Question Bank name is required'),
   description: z.string().optional(),
@@ -90,6 +89,35 @@ function BooleanToggle({
 
  
 export function BankDetailsSection({ form }: BankDetailsSectionProps) {
+  const quillRef = Editor as any;
+  const imageHandler = () => {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    input.click()
+
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+
+      const formData = new FormData()
+      formData.append('files', file)
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await res.json()
+
+      const url = data[0].url
+
+      const quill = quillRef.current.getQuill()
+      const range = quill.getSelection()
+
+      quill.insertEmbed(range.index, 'image', url)
+    }
+  }
   return (
     <Card className="rounded-2xl p-8 border border-blue-700/60 bg-gradient-to-br from-blue-950/70 to-blue-900/40 shadow-2xl shadow-blue-900/40 backdrop-blur-sm">
       <h2 className="text-xl font-semibold text-sky-300 mb-6">
@@ -258,12 +286,36 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
           <Label className="text-sm font-medium text-gray-200">
             Instructions
           </Label>
-          <Textarea
+          <div className="card">
+            <Controller
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <Editor
+                  value={field.value || ""}
+                  onTextChange={(e: any) => field.onChange(e.htmlValue)}
+                  style={{ height: '320px' }}
+                  modules={{
+                    toolbar: {
+                      container: [
+                        ['bold', 'italic'],
+                        ['link', 'image']
+                      ],
+                      handlers: {
+                        image: imageHandler
+                      }
+                    }
+                  }}
+                />
+              )}
+            />
+          </div>
+          {/* <Textarea
             className="min-h-[220px] bg-blue-950/50 border border-blue-700/60 text-white"
             {...form.register('tabSwitchLimit', {
               setValueAs: (v) => v === "" ? undefined : Number(v),
             })}
-          />
+          /> */}
         </div>
       </div>
     </Card>

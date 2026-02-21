@@ -21,6 +21,7 @@ import {
 import { strapi } from '@/lib/api/sdk'
 import { diff } from 'util'
 
+
 /* -------------------- Categories -------------------- */
 export const categoryOptions = [
   'JavaScript',
@@ -130,20 +131,13 @@ export function QuestionBankForm({
 
   /* -------------------- Submit -------------------- */
   const onSubmit = async (data: FormData) => {
-    console.log('Form Data:', data)
-    console.log('Questions:', questions)
     if (!questions.length) {
       alert('Please add at least one question')
       return
     }
 
 
-    const payload = {
-      ...data,
-      // questions,
-    }
-
-
+    console.log('Form Data:', data)
     try {
       setIsSubmitting(true)
 

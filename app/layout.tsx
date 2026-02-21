@@ -12,6 +12,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import Script from "next/script";
 import LayoutShell from "@/components/LayoutShell";
+import 'quill/dist/quill.snow.css'
 
 export const metadata: Metadata = {
   title: "AI Interviewer - Master Your Next Interview",

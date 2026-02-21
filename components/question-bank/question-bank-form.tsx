@@ -155,6 +155,7 @@ export function QuestionBankForm({
       if (!assessmentDocumentId) {
         throw new Error('Failed to create assessment')
       }
+    
       // upload all question with promise all after assessment is created
       const toBlocks = (text: string) => [
         {
@@ -167,6 +168,7 @@ export function QuestionBankForm({
           ]
         }
       ]
+    
       const questionPromises = questions.map((q) =>
         strapi.create("question-banks", {
           questionText: toBlocks(q.text),

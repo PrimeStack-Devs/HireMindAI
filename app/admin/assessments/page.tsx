@@ -2,7 +2,9 @@
 
 import AssessmentGrid from '@/components/admin/assesment/AssessmentGrid';
 import Header from '@/components/admin/Header';
+import { useStrapi } from '@/lib/api/useStrapi';
 import { useState } from 'react';
+
 
 
 const mockAssessments = [
@@ -60,6 +62,13 @@ const mockAssessments = [
 
 export default function AssessmentsPage() {
   const [assessments] = useState(mockAssessments);
+
+  const { data, isLoading, error } = useStrapi("assessments", {
+    populate: "*"
+  });
+
+
+  console.log('Fetched Assessments:', data, 'Loading:', isLoading, 'Error:', error)
 
   return (
     <main className="min-h-screen text-white px-2--- py-2--">

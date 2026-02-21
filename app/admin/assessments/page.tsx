@@ -60,7 +60,7 @@ export default function AssessmentsPage() {
   const [assessments] = useState(mockAssessments);
 
   return (
-    <main className="min-h-screen text-white px-6 py-10">
+    <main className="min-h-screen text-white px-2--- py-2--">
       <Header />
       <AssessmentGrid assessments={assessments} />
     </main>

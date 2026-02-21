@@ -16,11 +16,11 @@ export default function Page() {
     <main className="min-h-screen text-white">
       
 
-      <section className="container mx-auto px-6 py-10">
+      <section className="container mx-auto px-6--- py-10---">
         {/* Header */}
           <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-gray-400 hover:text-gray-200 mb-8"
+        className="flex items-center gap-2 text-gray-400 hover:text-gray-200 mb-4"
       >
         <ArrowLeft size={18} />
         Back
@@ -34,7 +34,7 @@ export default function Page() {
         className="mb-10"
       >
         <h1
-          className={`text-4xl md:text-5xl font-extrabold bg-gradient-to-r ${TEXT_GRADIENT} bg-clip-text text-transparent`}
+          className={`text-2xl md:text-3xl font-extrabold bg-gradient-to-r ${TEXT_GRADIENT} bg-clip-text text-transparent`}
         >
           Create Assessment
         </h1>
@@ -45,7 +45,7 @@ export default function Page() {
 
         {/* Form Card */}
         <motion.div
-          className={`max-w-4xl mx-auto rounded-2xl p-8 md:p-10 shadow-2xl shadow-blue-900/40 backdrop-blur-sm ${ACCENT_BG}`}
+          className={`max-w-5xl--- mx-auto rounded-2xl p-8 md:p-10 shadow-2xl shadow-blue-900/40 backdrop-blur-sm ${ACCENT_BG}`}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.7 }}

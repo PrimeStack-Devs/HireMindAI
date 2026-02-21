@@ -4,22 +4,25 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { UseFormReturn } from 'react-hook-form'
+import { Controller, UseFormReturn } from 'react-hook-form'
 import * as z from 'zod'
  
+const numberField = (msg: string) =>
+  z.preprocess(
+    (val) => (val === '' || val === null || Number.isNaN(val) ? undefined : val),
+    z.number({ required_error: msg }).min(1, msg)
+  )
 export const formSchema = z.object({
   name: z.string().min(1, 'Question Bank name is required'),
   description: z.string().optional(),
 
-  durationMinutes: z.number().min(1, 'Duration is required'),
-  tabSwitchLimit: z.number().min(0).optional(),
-
+  durationMinutes: z.coerce.number().min(1, 'Duration is required'),
+  tabSwitchLimit: z.coerce.number().min(0).optional(),
+  totalMarks: z.coerce.number().min(1, 'Total marks is required'),
+  attempts: z.coerce.number().min(1, 'Attempts is required'),
   autoSubmitOnTimeout: z.boolean().default(false),
   shuffleQuestions: z.boolean().default(false),
   shuffleOptions: z.boolean().default(false),
-
-  totalMarks: z.number().min(1, 'Total marks is required'),
-  attempts: z.number().min(1, 'Attempts is required'),
 
   instructions: z.string().optional(),
 })
@@ -99,10 +102,17 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
           <Label className="text-sm font-medium text-gray-200">
             Assessments Name <span className="text-sky-400">*</span>
           </Label>
-          <Input
-            placeholder="e.g., Senior React Developer Assessment"
-            className="bg-blue-950/50 border border-blue-700/60 text-white placeholder:text-gray-500"
-            {...form.register('name')}
+         
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="e.g., Senior React Developer Assessment"
+                className="bg-blue-950/50 border border-blue-700/60 text-white placeholder:text-gray-500"
+              />
+            )}
           />
         </div>
 
@@ -111,9 +121,17 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
           <Label className="text-sm font-medium text-gray-200">
             Description
           </Label>
-          <Textarea
-            className="min-h-24 bg-blue-950/50 border border-blue-700/60 text-white"
-            {...form.register('description')}
+        
+          <Controller
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <Textarea
+                {...field}
+                value={field.value ?? ""}
+                className="min-h-24 bg-blue-950/50 border border-blue-700/60 text-white"
+              />
+            )}
           />
         </div>
 
@@ -123,25 +141,46 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
             <Label className="text-sm font-medium text-gray-200">
               Duration (Minutes) <span className="text-sky-400">*</span>
             </Label>
-            <Input
-              type="number"
-              className="bg-blue-950/50 border border-blue-700/60 text-white"
-              {...form.register('durationMinutes', {
-                valueAsNumber: true,
-              })}
+         
+            <Controller
+              control={form.control}
+              name="durationMinutes"
+              render={({ field }) => (
+                <Input
+                  type="number"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? undefined : Number(e.target.value)
+                    )
+                  }
+                  className="bg-blue-950/50 border border-blue-700/60 text-white"
+                />
+              )}
             />
+            
           </div>
 
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-200">
               Tab Switch Limit
             </Label>
-            <Input
-              type="number"
-              className="bg-blue-950/50 border border-blue-700/60 text-white"
-              {...form.register('tabSwitchLimit', {
-                valueAsNumber: true,
-              })}
+            
+            <Controller
+              control={form.control}
+              name="tabSwitchLimit"
+              render={({ field }) => (
+                <Input
+                  type="number"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? undefined : Number(e.target.value)
+                    )
+                  }
+                  className="bg-blue-950/50 border border-blue-700/60 text-white"
+                />
+              )}
             />
           </div>
         </div>
@@ -173,10 +212,21 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
             <Label className="text-sm font-medium text-gray-200">
               Total Marks <span className="text-sky-400">*</span>
             </Label>
-            <Input
-              type="number"
-              className="bg-blue-950/50 border border-blue-700/60 text-white"
-              {...form.register('totalMarks', { valueAsNumber: true })}
+   
+            <Controller
+              control={form.control}
+              name="totalMarks"
+              render={({ field }) => (
+                <Input
+                  type="number"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? undefined : Number(e.target.value)
+                    )
+                  }
+                />
+              )}
             />
           </div>
 
@@ -184,10 +234,21 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
             <Label className="text-sm font-medium text-gray-200">
               Attempts <span className="text-sky-400">*</span>
             </Label>
-            <Input
-              type="number"
-              className="bg-blue-950/50 border border-blue-700/60 text-white"
-              {...form.register('attempts', { valueAsNumber: true })}
+       
+            <Controller
+              control={form.control}
+              name="attempts"
+              render={({ field }) => (
+                <Input
+                  type="number"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? undefined : Number(e.target.value)
+                    )
+                  }
+                />
+              )}
             />
           </div>
         </div>
@@ -199,7 +260,9 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
           </Label>
           <Textarea
             className="min-h-[220px] bg-blue-950/50 border border-blue-700/60 text-white"
-            {...form.register('instructions')}
+            {...form.register('tabSwitchLimit', {
+              setValueAs: (v) => v === "" ? undefined : Number(v),
+            })}
           />
         </div>
       </div>

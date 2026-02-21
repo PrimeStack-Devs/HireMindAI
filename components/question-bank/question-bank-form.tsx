@@ -70,6 +70,7 @@ export function QuestionBankForm({
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    shouldUnregister: false,
     defaultValues: initialData || {
       name: '',
       description: '',
@@ -127,16 +128,20 @@ export function QuestionBankForm({
 
   /* -------------------- Submit -------------------- */
   const onSubmit = async (data: FormData) => {
+    console.log('Form Data:', data)
+    console.log('Questions:', questions)
     if (!questions.length) {
       alert('Please add at least one question')
       return
     }
+
 
     const payload = {
       ...data,
       questions,
     }
 
+    console.log('Submitting Payload:', payload)
     try {
       setIsSubmitting(true)
 
@@ -168,7 +173,7 @@ export function QuestionBankForm({
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={form.handleSubmit(onSubmit, e => console.log(e))} className="space-y-8">
       {/* ---------------- Bank Details ---------------- */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -231,7 +236,7 @@ export function QuestionBankForm({
               : 'Creating...'
             : mode === 'edit'
             ? 'Update Assessment'
-            : 'Create Question Bank'}
+              : 'Create Assessment'}
         </Button>
       </div>
     </form>

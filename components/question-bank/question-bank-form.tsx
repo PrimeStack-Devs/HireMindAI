@@ -18,6 +18,8 @@ import {
   formSchema,
   FormData,
 } from './bank-details-section'
+import { strapi } from '@/lib/api/sdk'
+import { diff } from 'util'
 
 /* -------------------- Categories -------------------- */
 export const categoryOptions = [
@@ -138,26 +140,75 @@ export function QuestionBankForm({
 
     const payload = {
       ...data,
-      questions,
+      // questions,
     }
 
-    console.log('Submitting Payload:', payload)
+
     try {
       setIsSubmitting(true)
 
-      if (mode === 'edit') {
-        await fetch(`/api/assessments/${assessmentId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-      } else {
-        await fetch(`/api/assessments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
+      const res = await strapi.create("assessments", {
+        name: data.name,
+        description: data.description,
+        durationMinutes: data.durationMinutes,
+        tabSwitchLimit: data.tabSwitchLimit,
+        instructions: data.instructions,
+        totalMarks: data.totalMarks,
+
+      });
+      console.log('API Response:', res);
+      const assessmentDocumentId = res.data?.documentId;
+      if (!assessmentDocumentId) {
+        throw new Error('Failed to create assessment')
       }
+      // upload all question with promise all after assessment is created
+      const toBlocks = (text: string) => [
+        {
+          type: "paragraph",
+          children: [
+            {
+              type: "text",
+              text
+            }
+          ]
+        }
+      ]
+      const questionPromises = questions.map((q) =>
+        strapi.create("question-banks", {
+          questionText: toBlocks(q.text),
+          // category: q.category,
+          // type: q.type,
+          // difficulty: q.difficulty,
+          marks: q.marks,
+          options: q.options.map(opt => ({
+            text: opt.text,
+            isCorrect: opt.isCorrect
+          })),
+          assessments: {
+            connect: [
+              { documentId: assessmentDocumentId }
+            ]
+          } // associate question with the created assessment
+        })
+      );
+      await Promise.all(questionPromises).then((results) => {
+        console.log('All questions uploaded:', results)
+        })
+
+      
+      // if (mode === 'edit') {
+      //   await fetch(`/api/assessments/${assessmentId}`, {
+      //     method: 'PUT',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(payload),
+      //   })
+      // } else {
+      //   await fetch(`/api/assessments`, {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(payload),
+      //   })
+      // }
 
       alert(
         mode === 'edit'
@@ -235,7 +286,7 @@ export function QuestionBankForm({
               ? 'Updating...'
               : 'Creating...'
             : mode === 'edit'
-            ? 'Update Assessment'
+              ? 'Update Assessment'
               : 'Create Assessment'}
         </Button>
       </div>

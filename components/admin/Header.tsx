@@ -20,7 +20,7 @@ export default function Header() {
     <>
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-gray-400 hover:text-gray-200 mb-8"
+        className="flex items-center gap-2 text-gray-400 hover:text-gray-200 mb-2"
       >
         <ArrowLeft size={18} />
         Back
@@ -36,11 +36,11 @@ export default function Header() {
           className="mb-10"
         >
           <h1
-            className={`text-4xl md:text-5xl font-extrabold bg-gradient-to-r ${TEXT_GRADIENT} bg-clip-text text-transparent`}
+            className={`text-2xl md:text-4xl font-extrabold bg-gradient-to-r ${TEXT_GRADIENT} bg-clip-text text-transparent`}
           >
             Assessment Details
           </h1>
-          <p className="text-gray-300 mt-2">
+          <p className="text-gray-300 mt-2 ">
             Review and manage assessment questions and answers
           </p>
         </motion.div>

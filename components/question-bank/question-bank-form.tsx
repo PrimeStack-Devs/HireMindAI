@@ -184,7 +184,7 @@ export function QuestionBankForm({
             connect: [
               { documentId: assessmentDocumentId }
             ]
-          } // associate question with the created assessment
+          } 
         })
       );
       await Promise.all(questionPromises).then((results) => {
@@ -192,20 +192,6 @@ export function QuestionBankForm({
         })
 
       
-      // if (mode === 'edit') {
-      //   await fetch(`/api/assessments/${assessmentId}`, {
-      //     method: 'PUT',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(payload),
-      //   })
-      // } else {
-      //   await fetch(`/api/assessments`, {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(payload),
-      //   })
-      // }
-
       alert(
         mode === 'edit'
           ? 'Assessment updated successfully!'

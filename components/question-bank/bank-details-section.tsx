@@ -295,17 +295,17 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
                   value={field.value || ""}
                   onTextChange={(e: any) => field.onChange(e.htmlValue)}
                   style={{ height: '320px' }}
-                  modules={{
-                    toolbar: {
-                      container: [
-                        ['bold', 'italic'],
-                        ['link', 'image']
-                      ],
-                      handlers: {
-                        image: imageHandler
-                      }
-                    }
-                  }}
+                  // modules={{
+                  //   toolbar: {
+                  //     container: [
+                  //       ['bold', 'italic'],
+                  //       ['link', 'image']
+                  //     ],
+                  //     handlers: {
+                  //       image: imageHandler
+                  //     }
+                  //   }
+                  // }}
                 />
               )}
             />

@@ -3,6 +3,7 @@
 import AssessmentGrid from '@/components/admin/assesment/AssessmentGrid';
 import Header from '@/components/admin/Header';
 import { useStrapi } from '@/lib/api/useStrapi';
+import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
 
@@ -61,19 +62,32 @@ const mockAssessments = [
 
 
 export default function AssessmentsPage() {
-  const [assessments] = useState(mockAssessments);
-
+  
   const { data, isLoading, error } = useStrapi("assessments", {
     populate: "*"
   });
+ 
 
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-400  flex-col gap-10">
+        <LoaderCircle className=" w-10 h-10 animate-spin" />
+         Loading assessments...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex justify-center items-center h-screen text-red-400">
+        Failed to load assessments. Please refresh.
+      </div>
+    );
 
-  console.log('Fetched Assessments:', data, 'Loading:', isLoading, 'Error:', error)
+  // console.log('Fetched Assessments:', data, 'Loading:', isLoading, 'Error:', error)
 
   return (
     <main className="min-h-screen text-white px-2--- py-2--">
       <Header />
-      <AssessmentGrid assessments={assessments} />
+      <AssessmentGrid assessments={data?.data} />
     </main>
 
 

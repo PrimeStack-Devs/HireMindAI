@@ -46,7 +46,7 @@ const id = params.id;
 
   return (
     <main className="min-h-screen text-white">
-      <section className="container mx-auto px-6 py-10">
+      <section className="container mx-auto ">
 
         {/* Back */}
         <button

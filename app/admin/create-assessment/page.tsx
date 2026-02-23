@@ -16,7 +16,7 @@ export default function Page() {
     <main className="min-h-screen text-white">
       
 
-      <section className="container mx-auto px-6--- py-10---">
+      <section className="container mx-auto ">
         {/* Header */}
           <button
         onClick={() => router.back()}

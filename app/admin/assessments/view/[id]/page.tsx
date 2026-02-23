@@ -1,9 +1,13 @@
 'use client';
 
+import { strapi } from '@/lib/api/sdk';
+import { useStrapi } from '@/lib/api/useStrapi';
+import { questions } from '@/lib/questions';
+import { da } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Edit, CheckCircle, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 /* ===== THEME CONSTANTS ===== */
 const TEXT_GRADIENT = 'from-blue-200 to-sky-400';
@@ -11,55 +15,33 @@ const ACCENT_BG =
   'bg-gradient-to-br from-blue-950/70 to-blue-900/50 border border-blue-700/60';
 
 /* ===== MOCK DATA ===== */
-const initialAssessment = {
-  name: 'Frontend Developer Assessment',
-  totalQuestions: 3,
-  totalMarks: 30,
-  status: 'Draft',
-  questions: [
-    {
-      id: 1,
-      text: 'What is React?',
-      marks: 10,
-      options: [
-        { text: 'A JavaScript library for building UI', correct: true },
-        { text: 'A database', correct: false },
-        { text: 'A backend framework', correct: false },
-        { text: 'A CSS library', correct: false },
-      ],
-    },
-    {
-      id: 2,
-      text: 'Which hook is used for state management?',
-      marks: 10,
-      options: [
-        { text: 'useEffect', correct: false },
-        { text: 'useState', correct: true },
-        { text: 'useMemo', correct: false },
-        { text: 'useRef', correct: false },
-      ],
-    },
-    {
-      id: 3,
-      text: 'What does JSX stand for?',
-      marks: 10,
-      options: [
-        { text: 'Java Syntax Extension', correct: false },
-        { text: 'JavaScript XML', correct: true },
-        { text: 'JSON XML', correct: false },
-        { text: 'Java Source X', correct: false },
-      ],
-    },
-  ],
-};
+
 
 export default function AssessmentDetailPage() {
   const router = useRouter();
-  const [assessment, setAssessment] = useState(initialAssessment);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
-
-  const handleSave = () => {
-    const updatedQuestions = assessment.questions.map((q) =>
+  const params = useParams();
+  
+  const { data, isLoading, error } = useStrapi("assessments", {
+    populate: {questions:{populate:"*"}},
+    where:{id:Number(params.id)},
+  });
+  
+  // console.log('data:',data?.data[0])
+   
+  const [assessment, setAssessment] = useState<any>(null);
+  useEffect(() => {
+  if (data?.data?.length! > 0) {
+    setAssessment(data?.data[0]);
+  }
+}, [data]);
+  // console.log('assessment:',assessment)
+  // console.log('assessment:',assessment?.questions[0]?.questionText[0]?.children[0]?.text)
+  // console.log('assessment:',assessment?.questions[0]?.options)
+const handleSave = async () => {
+  try {
+    // 1️⃣ Update local UI immediately
+    const updatedQuestions = assessment.questions.map((q: any) =>
       q.id === editingQuestion.id ? editingQuestion : q
     );
 
@@ -68,11 +50,34 @@ export default function AssessmentDetailPage() {
       questions: updatedQuestions,
     });
 
-    setEditingQuestion(null);
-  };
+    // 2️⃣ Send only required fields to Strapi
+    await strapi.update(
+  "questions",
+  editingQuestion.documentId,
+  {
+    data: {
+      questionText: editingQuestion.questionText,
+      marks: editingQuestion.marks,
+      options: editingQuestion.options.map((opt: any) => ({
+        id: opt.id,
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+      })),
+    },
+  }
+);
 
+    console.log("Question updated successfully");
+
+    setEditingQuestion(null);
+  } catch (error) {
+    console.error("Update failed:", error);
+  }
+};
+
+  // console.log(assessment?.questions?.questionText?.map((q:any) => q?.type))
   return (
-    <main className="min-h-screen text-white px-6 py-10 relative">
+    <main className="min-h-screen text-white   relative">
       {/* BACK BUTTON */}
       <button
         onClick={() => router.back()}
@@ -109,20 +114,20 @@ export default function AssessmentDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div>
             <p className="text-gray-400 text-sm">Assessment Name</p>
-            <p className="font-semibold">{assessment.name}</p>
+            <p className="font-semibold">{assessment?.name}</p>
           </div>
           <div>
             <p className="text-gray-400 text-sm">Total Questions</p>
-            <p className="font-semibold">{assessment.questions.length}</p>
+            <p className="font-semibold">{assessment?.questions?.length}</p>
           </div>
           <div>
             <p className="text-gray-400 text-sm">Total Marks</p>
-            <p className="font-semibold">{assessment.totalMarks}</p>
+            <p className="font-semibold">{assessment?.totalMarks}</p>
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Status</p>
+            <p className="text-gray-400 text-sm">Time</p>
             <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-600/20 text-blue-300 border border-blue-600/40">
-              {assessment.status}
+              {assessment?.durationMinutes} minutes
             </span>
           </div>
         </div>
@@ -130,7 +135,7 @@ export default function AssessmentDetailPage() {
 
       {/* QUESTIONS */}
       <div className="space-y-8">
-        {assessment.questions.map((question, index) => (
+        {assessment?.questions?.map((question:any, index:number) => (
           <motion.div
             key={question.id}
             initial={{ opacity: 0, y: 24 }}
@@ -141,7 +146,7 @@ export default function AssessmentDetailPage() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold">
-                  Q{index + 1}. {question.text}
+                  Q{index + 1}. {question?.questionText[0]?.children[0]?.text}
                 </h3>
                 <p className="text-sm text-gray-400 mt-1">
                   Marks: {question.marks}
@@ -158,21 +163,21 @@ export default function AssessmentDetailPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {question.options.map((option, idx) => (
+              {question?.options?.map((option:any, idx:any) => (
                 <div
                   key={idx}
                   className={`flex items-center gap-3 p-4 rounded-xl border ${
-                    option.correct
+                    option.isCorrect
                       ? 'border-green-500 bg-green-500/10'
                       : 'border-blue-700/40 bg-blue-950/40'
                   }`}
                 >
-                  {option.correct && (
+                  {option.isCorrect && (
                     <CheckCircle className="text-green-400" size={18} />
                   )}
                   <span
                     className={`text-sm ${
-                      option.correct ? 'text-green-300' : 'text-gray-300'
+                      option.isCorrect ? 'text-green-300' : 'text-gray-300'
                     }`}
                   >
                     {option.text}
@@ -214,17 +219,31 @@ export default function AssessmentDetailPage() {
               <div>
                 <label className="text-sm text-gray-400">Question</label>
                 <textarea
-                  value={editingQuestion.text}
-                  onChange={(e) =>
-                    setEditingQuestion({
-                      ...editingQuestion,
-                      text: e.target.value,
-                    })
-                  }
-                  className="mt-2 w-full rounded-xl p-4
-                             bg-blue-950/40 border border-blue-700/60
-                             text-gray-200 focus:ring-2 focus:ring-blue-500"
-                />
+  value={
+    editingQuestion?.questionText?.[0]?.children?.[0]?.text || ''
+  }
+  onChange={(e) => {
+    const updatedQuestionText = [
+      {
+        ...editingQuestion.questionText[0],
+        children: [
+          {
+            ...editingQuestion.questionText[0].children[0],
+            text: e.target.value,
+          },
+        ],
+      },
+    ];
+
+    setEditingQuestion({
+      ...editingQuestion,
+      questionText: updatedQuestionText,
+    });
+  }}
+  className="mt-2 w-full rounded-xl p-4
+             bg-blue-950/40 border border-blue-700/60
+             text-gray-200 focus:ring-2 focus:ring-blue-500"
+/>
               </div>
 
               <div>
@@ -246,7 +265,7 @@ export default function AssessmentDetailPage() {
 
               <div className="space-y-4">
                 <label className="text-sm text-gray-400">Options</label>
-
+{/* {console.log('editingQuestion.options:',editingQuestion)} */}
                 {editingQuestion.options.map((option: any, idx: number) => (
                   <div
                     key={idx}
@@ -255,12 +274,12 @@ export default function AssessmentDetailPage() {
                   >
                     <input
                       type="radio"
-                      checked={option.correct}
+                      checked={option.isCorrect}
                       onChange={() => {
                         const updated = editingQuestion.options.map(
                           (opt: any, i: number) => ({
                             ...opt,
-                            correct: i === idx,
+                            isCorrect: i === idx,
                           })
                         );
 

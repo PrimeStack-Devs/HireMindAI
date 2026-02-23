@@ -10,13 +10,33 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-interface Assessment {
+export interface Assessment {
   id: number;
+  documentId: string;
+
   name: string;
-  totalQuestions: number;
-  timeMinutes: number;
+  description: string | null;
+  instructions: string | null;
+
+  durationMinutes: number;
   totalMarks: number;
-  createdDate: string;
+
+  questions: any[];  
+  attempts: any[];  
+  
+  autoSubmitOnTimeout: boolean;
+  shuffleOptions: boolean;
+  shuffleQuestions: boolean;
+  tabSwitchLimit: number;
+
+  publicLinkEnabled: boolean | null;
+
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+
+  createdByUser: any | null;
+  organization: any | null;
 }
 
 interface AssessmentCardProps {
@@ -24,7 +44,11 @@ interface AssessmentCardProps {
   index: number;
 }
 
-export default function AssessmentCard({ assessment, index }: AssessmentCardProps) {
+export default function AssessmentCard({ assessment, index }: any) {
+
+  const formattedDate = new Date(assessment.createdAt)
+  .toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+  console.log('assesment',assessment)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -58,7 +82,7 @@ export default function AssessmentCard({ assessment, index }: AssessmentCardProp
             align="end"
             className="bg-slate-900 border-blue-700/50 text-gray-200"
           >
-            <Link href='/admin/assessments/view'>
+            <Link href={`/admin/assessments/view/${assessment.id}`}>
               <DropdownMenuItem className="hover:bg-blue-600/20 cursor-pointer" >
                 View
 
@@ -81,26 +105,26 @@ export default function AssessmentCard({ assessment, index }: AssessmentCardProp
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-400">Total Questions</span>
           <span className="text-gray-200 font-semibold">
-            {assessment.totalQuestions}
+            {assessment.questions?.length}
           </span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-400">Time</span>
           <span className="text-gray-200 font-semibold">
-            {assessment.timeMinutes} min
+            {assessment?.durationMinutes} min
           </span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-400">Total Marks</span>
           <span className="text-gray-200 font-semibold">
-            {assessment.totalMarks}
+            {assessment?.totalMarks}
           </span>
         </div>
       </div>
 
       <div className="mt-4 pt-4 border-t border-blue-700/30">
         <p className="text-xs text-gray-500">
-          Created: {assessment.createdDate}
+          Created: {formattedDate}
         </p>
       </div>
     </motion.div>

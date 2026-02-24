@@ -126,7 +126,7 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
       </h2>
 
       <div className="space-y-8">
-        {/* ---------------- Name ---------------- */}
+        
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-200">
             Assessments Name <span className="text-sky-400">*</span>
@@ -145,7 +145,7 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
           />
         </div>
 
-        {/* ---------------- Description ---------------- */}
+        
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-200">
             Description

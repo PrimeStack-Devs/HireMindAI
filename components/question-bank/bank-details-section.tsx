@@ -311,12 +311,7 @@ export function BankDetailsSection({ form }: BankDetailsSectionProps) {
               )}
             />
           </div>
-          {/* <Textarea
-            className="min-h-[220px] bg-blue-950/50 border border-blue-700/60 text-white"
-            {...form.register('tabSwitchLimit', {
-              setValueAs: (v) => v === "" ? undefined : Number(v),
-            })}
-          /> */}
+       
         </div>
       </div>
     </Card>

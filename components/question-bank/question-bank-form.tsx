@@ -77,7 +77,7 @@ export function QuestionBankForm({
     defaultValues: initialData || {
       name: '',
       description: '',
-      durationMinutes: 60,
+      durationMinutes: 0,
       tabSwitchLimit: 0,
       autoSubmitOnTimeout: false,
       shuffleQuestions: false,

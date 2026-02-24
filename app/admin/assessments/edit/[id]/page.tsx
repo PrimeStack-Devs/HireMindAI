@@ -5,6 +5,7 @@ import { QuestionBankForm } from "@/components/question-bank/question-bank-form"
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
+import { useStrapi } from "@/lib/api/useStrapi";
 
 const TEXT_GRADIENT = "from-blue-200 to-sky-400";
 const ACCENT_BG =
@@ -13,30 +14,29 @@ const ACCENT_COLOR = "text-sky-400";
 
 export default function EditAssessmentPage() {
   const router = useRouter();
- const params = useParams<{ id: string }>();
-const id = params.id;
+  const params = useParams<{ id: string }>();
+  const id = params.id;
 
 
-  const [loading, setLoading] = useState(true);
+  
   const [assessmentData, setAssessmentData] = useState<any>(null);
 
+  const { data, isLoading, error } = useStrapi("assessments", {
+    populate:{questions:{populate:"*"}},
+    where: { id: Number(id) },
+  });
+   
+  // console.log('data',data?.data[0])
+
   useEffect(() => {
-    async function fetchAssessment() {
-      try {
-        const res = await fetch(`/api/assessments/${id}`);
-        const data = await res.json();
-        setAssessmentData(data);
-      } catch (error) {
-        console.error("Error fetching assessment:", error);
-      } finally {
-        setLoading(false);
-      }
+    if (data?.data?.length! > 0) {
+      setAssessmentData(data?.data[0]);
+     
     }
+  }, [data]);
 
-    fetchAssessment();
-  }, [id]);
-
-  if (loading) {
+  // console.log('assesment',assessmentData)
+  if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center text-gray-300">
         Loading Assessment...
@@ -90,7 +90,7 @@ const id = params.id;
             </p>
           </div>
 
-          
+
           <QuestionBankForm
             mode="edit"
             initialData={assessmentData}

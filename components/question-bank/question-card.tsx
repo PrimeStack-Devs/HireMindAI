@@ -1,3 +1,10 @@
+// 
+
+
+
+
+
+
 'use client'
 
 import { useState } from 'react'
@@ -16,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Plus, X, Trash2 } from 'lucide-react'
 import * as z from 'zod'
+import { strapi } from '@/lib/api/sdk'
 
 /* -------------------- Schema -------------------- */
 const questionSchema = z.object({
@@ -36,11 +44,12 @@ export type QuestionData = z.infer<typeof questionSchema>
 
 /* -------------------- Props -------------------- */
 interface QuestionCardProps {
-  question: QuestionData
+  question: any
   index: number
   categories: string[]
-  onUpdate: (question: QuestionData) => void
+  onUpdate: (question: any) => void
   onRemove: () => void
+  assessmentDocumentId: string
 }
 
 export function QuestionCard({
@@ -49,9 +58,50 @@ export function QuestionCard({
   categories,
   onUpdate,
   onRemove,
+  assessmentDocumentId,
 }: QuestionCardProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+   
+
+const handleSaveQuestion = async () => {
+  try {
+    const toBlocks = (text: string) => [
+      {
+        type: "paragraph",
+        children: [{ type: "text", text }],
+      },
+    ]
+
+    if (question.documentId) {
+      // 🔁 UPDATE
+      await strapi.update("question-banks", question.documentId, {
+        questionText: toBlocks(question.text),
+        marks: question.marks,
+        options: question.options,
+      })
+    } else {
+      // ➕ CREATE
+      await strapi.create("question-banks", {
+        questionText: toBlocks(question.text),
+        marks: question.marks,
+        options: question.options,
+        assessments: {
+          connect: [{ documentId: assessmentDocumentId }],
+        },
+      })
+      
+    }
+     
+
+    alert("Question saved successfully!")
+  } catch (error) {
+    console.error(error)
+    alert("Failed to save question")
+  }
+}
+ 
+ 
   /* -------------------- Handlers -------------------- */
   const handleTextChange = (text: string) =>
     onUpdate({ ...question, text })
@@ -85,7 +135,7 @@ export function QuestionCard({
   }
 
   const handleOptionCorrectChange = (optionIndex: number) => {
-    const newOptions = question.options.map((opt, idx) => ({
+    const newOptions = question?.options?.map((opt:any, idx:any) => ({
       ...opt,
       isCorrect: idx === optionIndex,
     }))
@@ -102,7 +152,7 @@ export function QuestionCard({
     if (question.options.length > 2) {
       onUpdate({
         ...question,
-        options: question.options.filter((_, i) => i !== optionIndex),
+        options: question.options.filter((_:any, i:any) => i !== optionIndex),
       })
     }
   }
@@ -231,7 +281,7 @@ export function QuestionCard({
             Options <span className="text-sky-400">*</span>
           </Label>
 
-          {question.options.map((option, optionIndex) => (
+          {question?.options?.map((option:any, optionIndex:any) => (
             <div
               key={optionIndex}
               className="flex items-center gap-3 p-3 rounded-lg border border-blue-700/40 bg-blue-950/30"
@@ -276,6 +326,14 @@ export function QuestionCard({
             <Plus className="w-4 h-4 mr-2" />
             Add Option
           </Button>
+          
+          <Button
+  type="button"
+  className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+  onClick={handleSaveQuestion}
+>
+  Save Question
+</Button>
         </div>
       </div>
     </Card>

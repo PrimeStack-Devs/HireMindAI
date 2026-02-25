@@ -29,9 +29,9 @@ export default function Sidebar() {
 
             {/* Logo */}
             <div className="h-16 flex items-center px-6 border-b border-blue-700/30">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                <Link href={"/"} className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
                     HireMind.ai
-                </h1>
+                </Link>
             </div>
 
             <nav className="flex-1 px-3 py-6 space-y-2">

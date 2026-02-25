@@ -8,6 +8,7 @@ import {
     Users,
     BarChart3,
     Settings,
+    Code,
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 
@@ -15,6 +16,7 @@ const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
     { icon: ClipboardList, label: 'Assessments', href: '/admin/assessments' },
     { icon: Users, label: 'Candidates', href: '/admin/candidates' },
+    { icon: Code, label: 'Skills', href: '/admin/skills' },
     { icon: BarChart3, label: 'Results', href: '/admin/results' },
     { icon: Settings, label: 'Settings', href: '/admin/settings' },
 ]

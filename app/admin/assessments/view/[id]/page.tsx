@@ -40,9 +40,13 @@ export default function AssessmentDetailPage() {
   // console.log('assessment:',assessment?.questions[0]?.options)
 const handleSave = async () => {
   try {
-    // 1️⃣ Update local UI immediately
+    if (!editingQuestion) return;
+
+    // Update local state
     const updatedQuestions = assessment.questions.map((q: any) =>
-      q.id === editingQuestion.id ? editingQuestion : q
+      q.documentId === editingQuestion.documentId
+        ? editingQuestion
+        : q
     );
 
     setAssessment({
@@ -50,25 +54,21 @@ const handleSave = async () => {
       questions: updatedQuestions,
     });
 
-    // 2️⃣ Send only required fields to Strapi
+    // Update in Strapi (correct collection name)
     await strapi.update(
-  "questions",
-  editingQuestion.documentId,
-  {
-    data: {
-      questionText: editingQuestion.questionText,
-      marks: editingQuestion.marks,
-      options: editingQuestion.options.map((opt: any) => ({
-        id: opt.id,
-        text: opt.text,
-        isCorrect: opt.isCorrect,
-      })),
-    },
-  }
-);
+      "question-banks",
+      editingQuestion.documentId,
+      {
+        questionText: editingQuestion.questionText,
+        marks: editingQuestion.marks,
+        options: editingQuestion.options.map((opt: any) => ({
+          text: opt.text,
+          isCorrect: opt.isCorrect,
+        })),
+      }
+    );
 
-    console.log("Question updated successfully");
-
+   alert("Question updated successfully");
     setEditingQuestion(null);
   } catch (error) {
     console.error("Update failed:", error);

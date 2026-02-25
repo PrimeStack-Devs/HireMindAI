@@ -1,3 +1,10 @@
+// 
+
+
+
+
+
+
 'use client'
 
 import { useState } from 'react'
@@ -16,13 +23,14 @@ import {
 } from '@/components/ui/select'
 import { Plus, X, Trash2 } from 'lucide-react'
 import * as z from 'zod'
+import { strapi } from '@/lib/api/sdk'
 
 /* -------------------- Schema -------------------- */
 const questionSchema = z.object({
   text: z.string().min(1, 'Question text is required'),
   category: z.string().min(1, 'Category is required'),
   type: z.enum(['MCQ', 'Multi-select', 'True/False']),
-  difficulty: z.enum(['Easy', 'Medium', 'Hard']),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
   marks: z.number().min(1),
   options: z.array(
     z.object({
@@ -36,11 +44,12 @@ export type QuestionData = z.infer<typeof questionSchema>
 
 /* -------------------- Props -------------------- */
 interface QuestionCardProps {
-  question: QuestionData
+  question: any
   index: number
-  categories: string[]
-  onUpdate: (question: QuestionData) => void
+  categories: any
+  onUpdate: (question: any) => void
   onRemove: () => void
+  assessmentDocumentId: string
 }
 
 export function QuestionCard({
@@ -49,8 +58,60 @@ export function QuestionCard({
   categories,
   onUpdate,
   onRemove,
+  assessmentDocumentId,
 }: QuestionCardProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // console.log("xategories",question)   
+
+  const handleSaveQuestion = async () => {
+    try {
+      const toBlocks = (text: string) => [
+        {
+          type: "paragraph",
+          children: [{ type: "text", text }],
+        },
+      ]
+
+      if (question.documentId) {
+        // 🔁 UPDATE
+        await strapi.update("question-banks", question.documentId, {
+          questionText: toBlocks(question.text),
+          marks: question.marks,
+          options: question.options,
+          difficulty: question.difficulty,
+          skills: {
+            connect: [{
+              documentId: question.category
+            }],
+          },
+
+        })
+      } else {
+        // ➕ CREATE
+        await strapi.create("question-banks", {
+          questionText: toBlocks(question.text),
+          marks: question.marks,
+          options: question.options,
+           difficulty: question.difficulty,
+          skills: {
+            connect: [{ documentId: question.category }],
+          },
+          assessments: {
+            connect: [{ documentId: assessmentDocumentId }],
+          },
+        })
+
+      }
+
+
+      alert("Question saved successfully!")
+    } catch (error) {
+      console.error(error)
+      alert("Failed to save question")
+    }
+  }
+
 
   /* -------------------- Handlers -------------------- */
   const handleTextChange = (text: string) =>
@@ -58,6 +119,7 @@ export function QuestionCard({
 
   const handleCategoryChange = (category: string) =>
     onUpdate({ ...question, category })
+
 
   const handleTypeChange = (type: string) =>
     onUpdate({
@@ -68,8 +130,9 @@ export function QuestionCard({
   const handleDifficultyChange = (difficulty: string) =>
     onUpdate({
       ...question,
-      difficulty: difficulty as 'Easy' | 'Medium' | 'Hard',
+      difficulty: difficulty as 'aasy' | 'medium' | 'hard',
     })
+
 
   const handleMarksChange = (marks: string) => {
     const num = parseInt(marks, 10)
@@ -85,7 +148,7 @@ export function QuestionCard({
   }
 
   const handleOptionCorrectChange = (optionIndex: number) => {
-    const newOptions = question.options.map((opt, idx) => ({
+    const newOptions = question?.options?.map((opt: any, idx: any) => ({
       ...opt,
       isCorrect: idx === optionIndex,
     }))
@@ -102,12 +165,12 @@ export function QuestionCard({
     if (question.options.length > 2) {
       onUpdate({
         ...question,
-        options: question.options.filter((_, i) => i !== optionIndex),
+        options: question.options.filter((_: any, i: any) => i !== optionIndex),
       })
     }
   }
 
-   
+
   return (
     <Card
       className="
@@ -140,7 +203,7 @@ export function QuestionCard({
             Question <span className="text-sky-400">*</span>
           </Label>
           <Textarea
-            value={question.text}
+            value={question?.text}
             onChange={(e) => handleTextChange(e.target.value)}
             placeholder="Enter your question here"
             className="
@@ -158,16 +221,16 @@ export function QuestionCard({
             Category <span className="text-sky-400">*</span>
           </Label>
           <Select
-            value={question.category}
+            value={question?.category}
             onValueChange={handleCategoryChange}
           >
             <SelectTrigger className="bg-blue-950/40 border-blue-700/60 text-gray-200">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent className="bg-blue-950 border-blue-700/60">
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
+              {categories?.data?.map((cat: any) => (
+                <SelectItem key={cat?.documentId} value={cat?.documentId}>
+                  {cat?.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -201,9 +264,9 @@ export function QuestionCard({
                     </>
                   ) : (
                     <>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
+                      <SelectItem value="easy">Easy</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="hard">Hard</SelectItem>
                     </>
                   )}
                 </SelectContent>
@@ -217,7 +280,7 @@ export function QuestionCard({
             </Label>
             <Input
               type="number"
-              value={question.marks}
+              value={question?.marks}
               onChange={(e) => handleMarksChange(e.target.value)}
               min="1"
               className="bg-blue-950/40 border-blue-700/60 text-gray-200"
@@ -231,7 +294,7 @@ export function QuestionCard({
             Options <span className="text-sky-400">*</span>
           </Label>
 
-          {question.options.map((option, optionIndex) => (
+          {question?.options?.map((option: any, optionIndex: any) => (
             <div
               key={optionIndex}
               className="flex items-center gap-3 p-3 rounded-lg border border-blue-700/40 bg-blue-950/30"
@@ -275,6 +338,14 @@ export function QuestionCard({
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Option
+          </Button>
+
+          <Button
+            type="button"
+            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={handleSaveQuestion}
+          >
+            Save Question
           </Button>
         </div>
       </div>

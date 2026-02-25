@@ -63,7 +63,7 @@ const mockAssessments = [
 
 export default function AssessmentsPage() {
   
-  const { data, isLoading, error } = useStrapi("assessments", {
+  const { data, isLoading, error,mutate } = useStrapi("assessments", {
     populate: "*"
   });
  
@@ -87,7 +87,7 @@ export default function AssessmentsPage() {
   return (
     <main className="min-h-screen text-white px-2--- py-2--">
       <Header />
-      <AssessmentGrid assessments={data?.data} />
+      <AssessmentGrid assessments={data?.data} mutate={mutate} />
     </main>
 
 

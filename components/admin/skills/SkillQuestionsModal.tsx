@@ -16,7 +16,6 @@ interface Props {
 }
 
 export function SkillQuestionsModal({ open, onClose, skill }: Props) {
-    console.log("skill viewww ",skill)
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl">
@@ -34,13 +33,14 @@ export function SkillQuestionsModal({ open, onClose, skill }: Props) {
                             </p>
                         )}
 
-                        {skill?.questions?.map((q: any) => (
+                        {skill?.questions?.map((q: any,index:any) => (
                             <div
                                 key={q.id}
-                                className="p-3 rounded-md border border-blue-600/20 bg-blue-900/30"
+                                className="p-3 rounded-md border border-blue-600/20 bg-blue-900/30 flex items-start space-x-3"
                             >
-                                <p className="text-sm text-white">
-                                    {q.question || q.title}
+                                <span>{index+1}</span>
+                                <p className="text-md text-white  ">
+                                    {q?.questionText[0]?.children[0]?.text || q?.title}
                                 </p>
                             </div>
                         ))}

@@ -11,11 +11,12 @@ import { useToast } from '@/components/ui/use-toast'
 import { strapi } from '@/lib/api/sdk'
 import { SkillModal } from '@/components/admin/skills/skill-modal'
 import { SkillQuestionsModal } from '@/components/admin/skills/SkillQuestionsModal'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const fetcher = async ([collection, query]: [string, any]) => {
     const res = await strapi.find(collection, query)
     return res.data
-  }
+}
 
 export default function SkillsPage() {
     const { data: skills, isLoading, mutate } = useSWR(
@@ -29,7 +30,7 @@ export default function SkillsPage() {
             }
         ],
         fetcher
-      )
+    )
     const { toast } = useToast()
 
     const [viewSkill, setViewSkill] = useState<any>(null)
@@ -78,10 +79,21 @@ export default function SkillsPage() {
 
             {/* Skills List */}
             <Card className="p-6 rounded-2xl border border-blue-700/50 bg-blue-950/40">
-
                 {isLoading && (
-                    <p className="text-gray-400">Loading skills...</p>
+                    <div className="grid md:grid-cols-3 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="p-4 rounded-lg border border-blue-600/30 bg-blue-900/40 space-y-3"
+                            >
+                                <Skeleton className="h-5 w-2/3 bg-blue-800/50 animate-pulse" />
+                                <Skeleton className="h-4 w-1/2 bg-blue-800/50 animate-pulse" />
+                                <Skeleton className="h-3 w-1/3 bg-blue-800/50 animate-pulse" />
+                            </div>
+                        ))}
+                    </div>
                 )}
+
 
                 {!isLoading && skills?.length === 0 && (
                     <p className="text-gray-400 text-center py-10">

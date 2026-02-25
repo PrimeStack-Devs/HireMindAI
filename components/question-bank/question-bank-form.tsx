@@ -319,6 +319,7 @@ import {
 } from './bank-details-section'
 import { strapi } from '@/lib/api/sdk'
 import { diff } from 'util'
+import toast from 'react-hot-toast'
 
 
 export const categoryOptions = [
@@ -490,10 +491,12 @@ const handleAssessmentCreate = async (data: FormData) => {
       )
     )
 
-    alert("Assessment created successfully!")
+    toast.success("Assessment created successfully!")
+    // alert("Assessment created successfully!")
   } catch (error) {
     console.error(error)
-    alert("Failed to create assessment")
+    // alert("Failed to create assessment")
+    toast.error("Failed to create assessment")
   } finally {
     setIsSubmitting(false)
   }
@@ -511,11 +514,12 @@ const handleAssessmentCreate = async (data: FormData) => {
         instructions: data.instructions,
         totalMarks: data.totalMarks,
       })
-
-      alert("Assessment updated successfully!")
+      toast.success("Assessment updated successfully!")
+      // alert("Assessment updated successfully!")
     } catch (error) {
       console.error(error)
-      alert("Failed to update assessment")
+      // alert("Failed to update assessment")
+      toast.error("Failed to update assessment")
     } finally {
       setIsSubmitting(false)
     }

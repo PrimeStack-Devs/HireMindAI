@@ -9,6 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { strapi } from '@/lib/api/sdk';
+import { mutate } from 'swr';
 
 export interface Assessment {
   id: number;
@@ -48,7 +50,22 @@ export default function AssessmentCard({ assessment, index }: any) {
 
   const formattedDate = new Date(assessment.createdAt)
   .toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-  console.log('assesment',assessment)
+
+const handleDelete = async (documentId:any) => {
+  try {
+     
+
+   const res =  await strapi.delete("assessments",String(documentId));
+
+   alert("Assessment deleted successfully!")
+    
+  } catch (err: any) {
+    console.error("Delete failed:", err?.response || err);
+  }
+};
+
+
+  // console.log('assesment',assessment)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -94,7 +111,9 @@ export default function AssessmentCard({ assessment, index }: any) {
               </DropdownMenuItem>
             </Link>
 
-            <DropdownMenuItem className="hover:bg-red-600/20 text-red-400 cursor-pointer">
+            <DropdownMenuItem className="hover:bg-red-600/20 text-red-400 cursor-pointer"
+            onClick={() => handleDelete(assessment?.documentId)}
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

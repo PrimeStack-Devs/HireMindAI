@@ -82,7 +82,7 @@ export default function AssessmentCard({ assessment, index }: any) {
             align="end"
             className="bg-slate-900 border-blue-700/50 text-gray-200"
           >
-            <Link href={`/admin/assessments/view/${assessment.id}`}>
+            <Link href={`/admin/assessments/view/${assessment.documentId}`}>
               <DropdownMenuItem className="hover:bg-blue-600/20 cursor-pointer" >
                 View
 

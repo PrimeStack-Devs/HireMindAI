@@ -320,19 +320,20 @@ import {
 import { strapi } from '@/lib/api/sdk'
 import { diff } from 'util'
 import toast from 'react-hot-toast'
+import { useStrapi } from '@/lib/api/useStrapi'
 
 
-export const categoryOptions = [
-  'JavaScript',
-  'TypeScript',
-  'React',
-  'Node.js',
-  'Python',
-  'AWS',
-  'Database Design',
-  'System Design',
-  'Problem Solving',
-]
+// export const categoryOptions = [
+//   'JavaScript',
+//   'TypeScript',
+//   'React',
+//   'Node.js',
+//   'Python',
+//   'AWS',
+//   'Database Design',
+//   'System Design',
+//   'Problem Solving',
+// ]
 
 
 const questionSchema = z.object({
@@ -368,6 +369,22 @@ export function QuestionBankForm({
 
   const [questions, setQuestions] = useState<any[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [categoryOptions, setCategoryOptions] = useState<any>(null)
+
+  // console.log('questopms',questions)
+  const { data, isLoading, error } = useStrapi("skills", {
+    populate: "*"
+  })
+
+  useEffect(() => {
+    if (data?.data?.length! > 0) {
+      setCategoryOptions(data)
+    }
+  }, [data])
+
+
+  // if (data) console.log('data', categoryOptions)
+
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -385,7 +402,7 @@ export function QuestionBankForm({
       instructions: '',
     },
   })
-// console.log("Updating Assessment ID:", initialData?.documentId)
+  // console.log("Updating Assessment ID:", initialData?.documentId)
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       form.reset(initialData)
@@ -394,7 +411,7 @@ export function QuestionBankForm({
         initialData.questions?.map((q: any) => ({
           documentId: q.documentId, // VERY IMPORTANT
           text: q.questionText?.[0]?.children?.[0]?.text || '',
-          category: q.category || '',
+          category: q.skills?.[0]?.documentId || '',
           type: q.type || 'MCQ',
           difficulty: q.difficulty || 'Medium',
           marks: q.marks,
@@ -440,72 +457,76 @@ export function QuestionBankForm({
       return updated
     })
   }
-const handleAssessmentCreate = async (data: FormData) => {
-  if (!questions.length) {
-    alert("Please add at least one question")
-    return
-  }
+  const handleAssessmentCreate = async (data: FormData) => {
+    if (!questions.length) {
+      alert("Please add at least one question")
+      return
+    }
 
-  try {
-    setIsSubmitting(true)
+    try {
+      setIsSubmitting(true)
 
-    /* ---------------- CREATE ASSESSMENT ---------------- */
+      /* ---------------- CREATE ASSESSMENT ---------------- */
 
-    const res = await strapi.create("assessments", {
-      
+      const res = await strapi.create("assessments", {
+
         name: data.name,
         description: data.description,
         durationMinutes: data.durationMinutes,
         tabSwitchLimit: data.tabSwitchLimit,
         instructions: data.instructions,
         totalMarks: data.totalMarks,
-      
-    })
 
-    const assessmentDocumentId = res.data.documentId
+      })
 
-    /* ---------------- BULK CREATE QUESTIONS ---------------- */
+      const assessmentDocumentId = res.data.documentId
 
-    const toBlocks = (text: string) => [
-      {
-        type: "paragraph",
-        children: [{ type: "text", text }],
-      },
-    ]
+      /* ---------------- BULK CREATE QUESTIONS ---------------- */
 
-    await Promise.all(
-      questions.map((q) =>
-        strapi.create("question-banks", {
- 
+      const toBlocks = (text: string) => [
+        {
+          type: "paragraph",
+          children: [{ type: "text", text }],
+        },
+      ]
+
+      await Promise.all(
+        questions.map((q) =>
+          strapi.create("question-banks", {
+
             questionText: toBlocks(q.text),
             marks: q.marks,
+            difficulty: q.difficulty,
             options: q.options.map((opt: any) => ({
               text: opt.text,
               isCorrect: opt.isCorrect,
             })),
+            skills: {
+              connect: [{ documentId: q.category }],
+            },
             assessments: {
               connect: [{ documentId: assessmentDocumentId }],
             },
-          
-        })
-      )
-    )
 
-    toast.success("Assessment created successfully!")
-    // alert("Assessment created successfully!")
-  } catch (error) {
-    console.error(error)
-    // alert("Failed to create assessment")
-    toast.error("Failed to create assessment")
-  } finally {
-    setIsSubmitting(false)
+          })
+        )
+      )
+
+      toast.success("Assessment created successfully!")
+      // alert("Assessment created successfully!")
+    } catch (error) {
+      console.error(error)
+      // alert("Failed to create assessment")
+      toast.error("Failed to create assessment")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-}
 
   const handleAssessmentUpdate = async (data: FormData) => {
     try {
       setIsSubmitting(true)
-// console.log("Updating Assessment ID:", initialData?.documentId)
+      // console.log("Updating Assessment ID:", initialData?.documentId)
       await strapi.update("assessments", initialData.documentId, {
         name: data.name,
         description: data.description,
@@ -513,6 +534,7 @@ const handleAssessmentCreate = async (data: FormData) => {
         tabSwitchLimit: data.tabSwitchLimit,
         instructions: data.instructions,
         totalMarks: data.totalMarks,
+
       })
       toast.success("Assessment updated successfully!")
       // alert("Assessment updated successfully!")
@@ -527,12 +549,12 @@ const handleAssessmentCreate = async (data: FormData) => {
 
   return (
     <form
-  onSubmit={form.handleSubmit((data) =>
-    mode === "edit"
-      ? handleAssessmentUpdate(data)
-      : handleAssessmentCreate(data)
-  )}
- className="space-y-8">
+      onSubmit={form.handleSubmit((data) =>
+        mode === "edit"
+          ? handleAssessmentUpdate(data)
+          : handleAssessmentCreate(data)
+      )}
+      className="space-y-8">
       {/* ---------------- Bank Details ---------------- */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}

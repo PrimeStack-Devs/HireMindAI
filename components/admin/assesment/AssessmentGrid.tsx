@@ -36,8 +36,8 @@ export interface Assessment {
 //   assessments: Assessment[];
 // }
 
-export default function AssessmentGrid({ assessments }: any) {
-  console.log('nreifneoi',assessments);
+export default function AssessmentGrid({ assessments,mutate }: any) {
+  // console.log('nreifneoi',assessments);
   return (
     <div className="py-8">
       <motion.div
@@ -51,6 +51,7 @@ export default function AssessmentGrid({ assessments }: any) {
             key={assessment.id}
             assessment={assessment}
             index={index}
+            mutate={mutate}
           />
         ))}
       </motion.div>

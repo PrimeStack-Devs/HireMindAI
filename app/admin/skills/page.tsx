@@ -43,7 +43,8 @@ export default function SkillsPage() {
         if (!confirm('Delete this skill?')) return
 
         try {
-            await strapi.delete('skills', String(id))
+          await strapi.delete('skills', String(id))
+           
 
             toast({
                 title: 'Skill deleted',

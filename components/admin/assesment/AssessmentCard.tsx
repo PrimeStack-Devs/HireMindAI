@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { strapi } from '@/lib/api/sdk';
-import { mutate } from 'swr';
-
+import toast from 'react-hot-toast'
+ 
 export interface Assessment {
   id: number;
   documentId: string;
@@ -23,9 +23,9 @@ export interface Assessment {
   durationMinutes: number;
   totalMarks: number;
 
-  questions: any[];  
-  attempts: any[];  
-  
+  questions: any[];
+  attempts: any[];
+
   autoSubmitOnTimeout: boolean;
   shuffleOptions: boolean;
   shuffleQuestions: boolean;
@@ -46,23 +46,29 @@ interface AssessmentCardProps {
   index: number;
 }
 
-export default function AssessmentCard({ assessment, index }: any) {
+export default function AssessmentCard({ assessment, index ,mutate}: any) {
+
+
+
 
   const formattedDate = new Date(assessment.createdAt)
-  .toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    .toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
-const handleDelete = async (documentId:any) => {
-  try {
-     
+  const handleDelete = async (documentId: any) => {
+    try {
 
-   const res =  await strapi.delete("assessments",String(documentId));
 
-   alert("Assessment deleted successfully!")
-    
-  } catch (err: any) {
-    console.error("Delete failed:", err?.response || err);
-  }
-};
+      await strapi.delete("assessments", String(documentId));
+
+
+      toast.success("Assessment deleted successfully!");
+      mutate()
+
+    } catch (err: any) {
+      console.error("Delete failed:", err?.response || err);
+      toast.error(err?.response || "Delete failed!");
+    }
+  };
 
 
   // console.log('assesment',assessment)
@@ -112,7 +118,7 @@ const handleDelete = async (documentId:any) => {
             </Link>
 
             <DropdownMenuItem className="hover:bg-red-600/20 text-red-400 cursor-pointer"
-            onClick={() => handleDelete(assessment?.documentId)}
+              onClick={() => handleDelete(assessment?.documentId)}
             >
               Delete
             </DropdownMenuItem>

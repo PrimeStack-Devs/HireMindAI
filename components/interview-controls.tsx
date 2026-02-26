@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import AISpeakingBars from "./ai-speaking-bars";
 import MicVisualizer from "./mic-visualizer";
 import { motion } from "framer-motion";
@@ -28,6 +28,9 @@ export default function InterviewControls({
   terminateAudio: () => void;
 }) {
   const recognitionRef = useRef<any>(null);
+  const listeningRef = useRef<boolean>(false);
+  const textRef = useRef<string>("");
+  const [isRecognizing, setIsRecognizing] = useState(false);
 
   // ✅ store final confirmed transcript
   const finalTranscriptRef = useRef<string>("");
@@ -37,6 +40,10 @@ export default function InterviewControls({
 
   // ✅ prevent infinite restart loop after stop()
   const manuallyStoppedRef = useRef<boolean>(false);
+  const startingRef = useRef<boolean>(false);
+  const baseTextRef = useRef<string>("");
+  const restartAttemptsRef = useRef<number>(0);
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ✅ textarea ref for autosize
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -51,12 +58,19 @@ export default function InterviewControls({
   }, [text]);
 
   useEffect(() => {
+    listeningRef.current = listening;
+  }, [listening]);
+
+  useEffect(() => {
+    textRef.current = text;
+  }, [text]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
-
     if (!SpeechRecognition) {
       console.warn("SpeechRecognition is not supported in this browser.");
       return;
@@ -64,31 +78,37 @@ export default function InterviewControls({
 
     const recognition = new SpeechRecognition();
 
-    recognition.lang = "en-IN"; // change to "en-US" if you want
+    recognition.lang = navigator.language || "en-US";
     recognition.interimResults = true;
     recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event: any) => {
-      let finalText = "";
+      let newFinalText = "";
       let interimText = "";
 
-      // ✅ rebuild complete transcript from scratch every time
-      for (let i = 0; i < event.results.length; i++) {
+      // ✅ consume only new result range to avoid replacing/duplicating text
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        const spokenText = result[0]?.transcript || "";
+        const spokenText = (result[0]?.transcript || "").trim();
+        if (!spokenText) continue;
 
         if (result.isFinal) {
-          finalText += spokenText + " ";
+          newFinalText += spokenText + " ";
         } else {
           interimText += spokenText + " ";
         }
       }
 
-      const merged = (finalText + interimText).replace(/\s+/g, " ").trim();
+      if (newFinalText) {
+        finalTranscriptRef.current += newFinalText;
+      }
 
-      // ✅ keep refs updated
-      finalTranscriptRef.current = finalText.replace(/\s+/g, " ").trim() + " ";
+      const baseText = baseTextRef.current;
+      const merged = `${baseText} ${finalTranscriptRef.current} ${interimText}`
+        .replace(/\s+/g, " ")
+        .trim();
+
       lastFinalIndexRef.current = event.results.length - 1;
 
       setText(merged);
@@ -98,25 +118,69 @@ export default function InterviewControls({
 
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
+      startingRef.current = false;
+      setIsRecognizing(false);
 
       // ✅ ignore aborted error (comes from manual stop)
       if (event.error === "aborted") return;
 
-      setListening(false);
+      // Fatal errors: stop mic and reflect status immediately
+      if (
+        event.error === "not-allowed" ||
+        event.error === "service-not-allowed" ||
+        event.error === "audio-capture"
+      ) {
+        manuallyStoppedRef.current = true;
+        setListening(false);
+        return;
+      }
+      // Non-fatal errors (no-speech/network) let onend trigger retry
+    };
+
+    recognition.onstart = () => {
+      startingRef.current = false;
+      restartAttemptsRef.current = 0;
+      setIsRecognizing(true);
     };
 
     recognition.onend = () => {
+      setIsRecognizing(false);
+
       // ✅ restart only if it ended naturally (not manually stopped)
-      if (listening && !manuallyStoppedRef.current) {
+      if (listeningRef.current && !manuallyStoppedRef.current) {
+        const maxRetries = 5;
+        if (restartAttemptsRef.current >= maxRetries) {
+          setListening(false);
+          return;
+        }
+
+        const delay = Math.min(1000 * 2 ** restartAttemptsRef.current, 8000);
+        restartAttemptsRef.current += 1;
+
         try {
-          recognition.start();
-        } catch { }
+          if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+          restartTimerRef.current = setTimeout(() => {
+            try {
+              startingRef.current = true;
+              recognition.start();
+            } catch {
+              startingRef.current = false;
+              setListening(false);
+            }
+          }, delay);
+        } catch {
+          setListening(false);
+        }
       }
     };
 
     recognitionRef.current = recognition;
 
     return () => {
+      if (restartTimerRef.current) {
+        clearTimeout(restartTimerRef.current);
+        restartTimerRef.current = null;
+      }
       try {
         recognition.stop();
       } catch { }
@@ -131,24 +195,52 @@ export default function InterviewControls({
 
     if (listening) {
       manuallyStoppedRef.current = false;
+      if (startingRef.current) return;
 
       // ✅ IMPORTANT FIX:
       // Don't clear existing text when mic starts.
       // Just continue from current text.
-      finalTranscriptRef.current = text?.trim() ? text.trim() + " " : "";
+      baseTextRef.current = textRef.current?.trim() || "";
+      finalTranscriptRef.current = "";
       lastFinalIndexRef.current = -1;
 
       try {
+        startingRef.current = true;
         recognition.start();
-      } catch { }
+      } catch {
+        startingRef.current = false;
+        setListening(false);
+      }
     } else {
       manuallyStoppedRef.current = true;
+      restartAttemptsRef.current = 0;
+      if (restartTimerRef.current) {
+        clearTimeout(restartTimerRef.current);
+        restartTimerRef.current = null;
+      }
+      setIsRecognizing(false);
 
       try {
         recognition.stop();
       } catch { }
     }
-  }, [listening, text]);
+  }, [listening]);
+
+  // Periodically refresh recognition session to reduce long-running degradation.
+  useEffect(() => {
+    if (!listening) return;
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+
+    const refreshTimer = setInterval(() => {
+      if (!listeningRef.current || manuallyStoppedRef.current) return;
+      try {
+        recognition.stop();
+      } catch { }
+    }, 60000);
+
+    return () => clearInterval(refreshTimer);
+  }, [listening]);
 
   // ✅ stop listening when AI starts speaking
   useEffect(() => {
@@ -158,6 +250,7 @@ export default function InterviewControls({
 
   const handleClear = () => {
     setText("");
+    baseTextRef.current = "";
     finalTranscriptRef.current = "";
     lastFinalIndexRef.current = -1;
   };
@@ -182,8 +275,19 @@ export default function InterviewControls({
             className="text-xs text-muted-foreground text-center"
           >
             {listening
-              ? "Listening... (you can edit text too)"
+              ? isRecognizing
+                  ? <div className="w-full flex justify-baseline items-center">
+                    <div className="mx-auto">
+                      <div className="jarvis-container">
+                        <div className="jarvis-ring"></div>
+                        <div className="jarvis-core"></div>
+                      </div>
+                      <p className="text-xs text-cyan-400 tracking-widest mt-2">LISTENING</p>
+                    </div>
+                </div>
+                : "Mic reconnecting..."
               : "Type or use mic"}
+
           </motion.div>
 
           {/* ✅ Unified textarea + mic + clear + send */}
@@ -200,7 +304,12 @@ export default function InterviewControls({
                   setText(value);
 
                   // ✅ editing allowed while mic is ON
-                  finalTranscriptRef.current = value ? value.trim() + " " : "";
+                  if (listeningRef.current) {
+                    baseTextRef.current = value ? value.trim() : "";
+                    finalTranscriptRef.current = "";
+                  } else {
+                    baseTextRef.current = "";
+                  }
                   lastFinalIndexRef.current = -1;
                 }}
                 onKeyDown={(e) => {
@@ -249,14 +358,16 @@ export default function InterviewControls({
               type="button"
               onClick={() => setListening((s) => !s)}
               className={`h-10 w-10 flex items-center justify-center rounded-md border transition
-                ${listening
+                ${listening && isRecognizing
                   ? "bg-red-500 text-white border-red-500"
-                  : "bg-background text-foreground border-border hover:bg-muted"
+                  : listening && !isRecognizing
+                    ? "bg-yellow-500 text-white border-yellow-500"
+                    : "bg-background text-foreground border-border hover:bg-muted"
                 }`}
-              title={listening ? "Stop Mic" : "Start Mic"}
-              aria-label={listening ? "Stop Mic" : "Start Mic"}
+              title={listening ? (isRecognizing ? "Stop Mic" : "Mic reconnecting") : "Start Mic"}
+              aria-label={listening ? (isRecognizing ? "Stop Mic" : "Mic reconnecting") : "Start Mic"}
             >
-              {listening ? <MicOff size={18} /> : <Mic size={18} />}
+              {listening && isRecognizing ? <MicOff size={18} /> : <Mic size={18} />}
             </button>
 
             {/* Send button */}

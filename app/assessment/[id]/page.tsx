@@ -1,21 +1,46 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Clock, BookOpen, ArrowRight } from 'lucide-react'
 import { useEffect } from 'react'
+import { useStrapi } from '@/lib/api/useStrapi'
 
 export default function AssessmentPage() {
   const router = useRouter()
+const params=useParams()
+
+const { data, isLoading, error } = useStrapi(
+  "assessment-schedules",
+  {
+    populate: {
+      assessment: {
+        populate: {
+          questions: true,
+        },
+      },
+    },
+    where: {
+      documentId: String(params.id),
+    },
+  }
+)
+const total_questions =
+  (data?.data?.[0] as any)?.assessment?.questions?.length ?? 0
+const duration =
+  (data?.data?.[0] as any)?.duration
+
+const instructions= (data?.data?.[0] as any)?.assessment?.instructions
+
 
 const handleStartTest = async () => {
   try {
     if (!document.fullscreenElement) {
       await document.documentElement.requestFullscreen()
     }
-    router.push('/assessment/test')
+      router.push(`/assessment/${params.id}/test`)
   } catch (err) {
     console.error('Fullscreen request failed', err)
     // optional: show toast saying "Please allow fullscreen"
@@ -86,7 +111,7 @@ useEffect(() => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Questions</p>
-                    <p className="text-3xl font-bold text-foreground">20</p>
+                    <p className="text-3xl font-bold text-foreground">{total_questions}</p>
                   </div>
                 </div>
 
@@ -96,7 +121,7 @@ useEffect(() => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Estimated Time</p>
-                    <p className="text-3xl font-bold text-foreground">~20 min</p>
+                    <p className="text-3xl font-bold text-foreground">{duration} min</p>
                   </div>
                 </div>
               </motion.div>
@@ -109,24 +134,13 @@ useEffect(() => {
                 className="space-y-3 mb-8 p-4 rounded-lg bg-secondary border border-border/30"
               >
                 <h3 className="font-semibold text-foreground mb-4">What to expect:</h3>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">✓</span>
-                    <span>Multiple choice questions with 4 options each</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">✓</span>
-                    <span>Progress tracking throughout the test</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">✓</span>
-                    <span>Navigate between questions freely</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">✓</span>
-                    <span>Submit your assessment when complete</span>
-                  </li>
-                </ul>
+                <div
+    className="prose prose-sm max-w-none text-muted-foreground
+               prose-li:marker:text-primary"
+    dangerouslySetInnerHTML={{
+      __html: instructions ?? "",
+    }}
+  />
               </motion.div>
 
               {/* Start Button */}

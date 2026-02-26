@@ -6,6 +6,7 @@ import { questions } from '@/lib/questions';
 import { da } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Edit, CheckCircle, X } from 'lucide-react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -21,7 +22,6 @@ export default function AssessmentDetailPage() {
   const router = useRouter();
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
   const params = useParams();
-  
   const { data, isLoading, error } = useStrapi("assessments", {
     populate: {questions:{populate:"*"}},
     where:{id:Number(params.id)},
@@ -75,7 +75,7 @@ const handleSave = async () => {
   }
 };
 
-  // console.log(assessment?.questions?.questionText?.map((q:any) => q?.type))
+  console.log(assessment)
   return (
     <main className="min-h-screen text-white   relative">
       {/* BACK BUTTON */}
@@ -111,7 +111,7 @@ const handleSave = async () => {
         transition={{ delay: 0.1 }}
         className={`rounded-2xl p-6 mb-10 ${ACCENT_BG}`}
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <div>
             <p className="text-gray-400 text-sm">Assessment Name</p>
             <p className="font-semibold">{assessment?.name}</p>
@@ -129,6 +129,17 @@ const handleSave = async () => {
             <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-600/20 text-blue-300 border border-blue-600/40">
               {assessment?.durationMinutes} minutes
             </span>
+          </div>
+          <div>
+             <Link
+          href={`/admin/assessments/schedule/${params.id}`}
+          className="flex-1 hover:opacity-80 transition-opacity"
+        >
+
+            <span className="inline-block px-3 py-1 text-sm rounded-full bg-green-600/50 cursor-pointer text-blue-300 border border-blue-600/40">
+              schedule Now
+            </span>
+        </Link>
           </div>
         </div>
       </motion.div>

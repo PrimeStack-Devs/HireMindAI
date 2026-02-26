@@ -27,6 +27,7 @@ export default function EditAssessmentPage() {
   });
    
   // console.log('data',data?.data[0])
+  
 
   useEffect(() => {
     if (data?.data?.length! > 0) {

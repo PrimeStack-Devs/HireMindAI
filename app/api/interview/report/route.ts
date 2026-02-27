@@ -209,7 +209,7 @@ Return **only** the JSON in the exact structure above.
         messages: [
           {
             role: "system",
-            content: interviewDetails?.mode === "MCQ" ? systemPromptMCQ : systemPrompt,
+            content: interviewDetails?.mode === "Coding" ? systemPromptMCQ : systemPrompt,
           },
           {
             role: "user",

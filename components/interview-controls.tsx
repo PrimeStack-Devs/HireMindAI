@@ -32,23 +32,23 @@ export default function InterviewControls({
   const textRef = useRef<string>("");
   const [isRecognizing, setIsRecognizing] = useState(false);
 
-  // ✅ store final confirmed transcript
+  // store final confirmed transcript
   const finalTranscriptRef = useRef<string>("");
 
-  // ✅ track last final index to avoid repeating same sentence
+  //  track last final index to avoid repeating same sentence
   const lastFinalIndexRef = useRef<number>(-1);
 
-  // ✅ prevent infinite restart loop after stop()
+  //  prevent infinite restart loop after stop()
   const manuallyStoppedRef = useRef<boolean>(false);
   const startingRef = useRef<boolean>(false);
   const baseTextRef = useRef<string>("");
   const restartAttemptsRef = useRef<number>(0);
   const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ✅ textarea ref for autosize
+  //  textarea ref for autosize
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // ✅ autosize textarea whenever text changes
+  //  autosize textarea whenever text changes
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -79,6 +79,7 @@ export default function InterviewControls({
     const recognition = new SpeechRecognition();
 
     recognition.lang = navigator.language || "en-US";
+    // recognition.lang = "en-IN";
     recognition.interimResults = true;
     recognition.continuous = true;
     recognition.maxAlternatives = 1;
@@ -87,7 +88,7 @@ export default function InterviewControls({
       let newFinalText = "";
       let interimText = "";
 
-      // ✅ consume only new result range to avoid replacing/duplicating text
+      //  consume only new result range to avoid replacing/duplicating text
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const spokenText = (result[0]?.transcript || "").trim();

@@ -2,9 +2,96 @@ export async function POST(req: Request) {
   try {
     const { messages, interviewDetails, faceMeshFeedback } = await req.json();
 
-    const model = "mistral";
-    const systemPrompt = `
-You are an expert AI recruiter and evaluation system.
+
+
+    const systemPromptMCQ = `You are an AI Assessment Engine for objective MCQ evaluations.
+
+    Your task: Generate a **structured MCQ performance report strictly in RAW JSON format**.
+    
+    This is NOT a behavioral interview.
+    This is an objective knowledge assessment.
+    
+    ### ⚠️ ABSOLUTE RULES:
+    - Output must be raw JSON only — no Markdown, no text before or after.
+    - Output must start with { and end with }.
+    - Follow the exact schema below.
+    - Always include all fields.
+    - Ensure JSON is valid for JSON.parse().
+    
+    ### 📋 JSON Schema:
+    {
+      "candidateInformation": {
+        "candidateName": string,
+        "jobRole": string,
+        "difficulty": string,
+        "mode": string,
+        "numOfQuestions": number,
+        "skillsAssessed": string
+      },
+      "answerAnalysis": {
+        "candidateAnswersSummary": string,
+        "strengths": string[],
+        "weaknesses": string[],
+        "communicationStyle": string,
+        "problemSolvingApproach": string,
+        "insights": string[]
+      },
+      "facialAnalytics": {
+        "confidence": string,
+        "nervousness": string,
+        "emotionSummary": string,
+        "notes": string
+      },
+      "overallPerformance": {
+        "summary": string,
+        "hiringRecommendation": "Yes" | "Maybe" | "No",
+        "justification": string
+      },
+      "summaryAndNextSteps": {
+        "finalSummary": string,
+        "recommendation": "Yes" | "Maybe" | "No",
+        "rationale": string[],
+        "actionableNextSteps": string[]
+      },
+      "scores": {
+        "technicalKnowledge": number,
+        "communication": number,
+        "problemSolving": number,
+        "confidenceLevel": number,
+        "engagement": number,
+        "composure": number,
+        "overall": number,
+        "potentialFit": number
+      }
+    }
+    
+    ### 🧠 MCQ Evaluation Logic:
+    - Evaluation must be based ONLY on answer correctness.
+    - Do NOT infer personality, communication, or engagement from MCQ responses.
+    - Facial analytics must NOT reduce scores.
+    - Treat behavioral traits as neutral since MCQ does not measure them.
+    
+    ### 📊 Scoring Rules:
+    - High accuracy → high technicalKnowledge.
+    - Full correctness → technicalKnowledge must be 10.
+    - problemSolving reflects logical correctness, not explanation ability.
+    - communication, engagement, confidence, composure default to neutral baseline (7–8).
+    - overall score must reflect accuracy-driven performance.
+    
+    ### ⚙️ Edge Cases:
+    - If no answers → use "No valid response provided."
+    - If facial data missing → set facial fields to "Not detected".
+    - All scores must be integers between 0–10.
+    
+    ### 🎯 Output Tone:
+    - Performance-focused
+    - Neutral
+    - Assessment-style (not HR-style)
+    
+    Return only JSON in the defined schema.`;
+
+
+    const systemPrompt = `You are an expert AI recruiter and evaluation system.
 
 Your task: Generate a **structured interview report strictly in RAW JSON format**.
 
@@ -122,7 +209,7 @@ Return **only** the JSON in the exact structure above.
         messages: [
           {
             role: "system",
-            content: systemPrompt,
+            content: interviewDetails?.mode === "Coding" ? systemPromptMCQ : systemPrompt,
           },
           {
             role: "user",

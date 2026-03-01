@@ -160,3 +160,57 @@ input[type="number"]:focus {
 input[type="number"] {
   scroll-behavior: auto;
 }
+.jarvis-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Core Orb */
+.jarvis-core {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #7dd3fc, #0284c7 60%, #0369a1);
+  box-shadow:
+    0 0 15px rgba(0, 180, 255, 0.7),
+    0 0 40px rgba(0, 180, 255, 0.4),
+    inset 0 0 12px rgba(255,255,255,0.2);
+  animation: core-pulse 2.5s ease-in-out infinite;
+}
+
+/* Rotating Outer Ring */
+.jarvis-ring {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 200, 255, 0.5);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  animation: rotate-ring 4s linear infinite;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.3);
+}
+
+/* Core subtle pulse */
+@keyframes core-pulse {
+  0%,100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Ring rotation */
+@keyframes rotate-ring {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

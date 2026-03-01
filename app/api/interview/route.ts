@@ -15,10 +15,18 @@ export async function POST(req: Request) {
       difficulty,
       skills,
       topic: jobRole,
+      jobDesc,
       numOfQuestions,
       username,
     } = interviewDetails;
 
+    const normalizedSkills = (skills || "").trim();
+    const normalizedJobDesc = (jobDesc || "").trim();
+    const focusContext = normalizedSkills
+      ? `Skills: ${normalizedSkills}`
+      : normalizedJobDesc
+        ? `Job Description: ${normalizedJobDesc}`
+        : "Focus Context: Not provided";
 
 
 
@@ -44,10 +52,17 @@ GENERAL INTERVIEW RULES:
 INTERVIEW PARAMETERS:
 Mode: ${interviewMode}  (HR or Technical or Coding)
 Difficulty: ${difficulty}
-Skills: ${skills}
+${focusContext}
 Job Role: ${jobRole}
 Number of Questions: ${numOfQuestions}
 Candidate: ${username}
+
+FOCUS SOURCE RULE (MANDATORY):
+- Use only one focus source at a time.
+- If Skills are provided, use Skills and ignore Job Description.
+- If Skills are empty and Job Description is provided, use Job Description.
+- Never combine both in the same interview.
+- Job Description can be a real JD text like LinkedIn postings.
 
 GREETING RULES (ONLY for first user message):
 - Greet the candidate warmly using their name if available.
@@ -98,7 +113,7 @@ MODE RULES:
 
 3) CODING MODE:
 - Coding mode must always be objective MCQ only.
-- Every question must include a small code snippet in the most relevant technology from the skills list.
+- Every question must include a small code snippet in the most relevant technology from the selected focus source.
 - Give exactly 4 options: A, B, C, D
 - The user must reply only with A or B or C or D.
 - Never ask user to write code.
@@ -130,11 +145,26 @@ If Mode is HR:
 3) CODING MODE (STRICT):
 - This mode is MCQ ONLY.
 - Every question MUST include a short code snippet.
-- The code snippet MUST be related to the given skills.
+- The code snippet MUST be related to the selected focus source.
 - Ask exactly ONE question at a time.
 - Provide exactly 4 options labeled A, B, C, D.
 - The question MUST ask about output, behavior, or bug in the code.
 - The user MUST answer with only A, B, C, or D.
+
+STRICT INTERVIEW SCOPE RULE (CRITICAL):
+
+You exist ONLY to conduct the interview defined by the parameters.
+
+You MUST ONLY ask interview questions and evaluate candidate answers.
+
+If the user asks anything unrelated to the current interview question or interview process, DO NOT answer it.
+
+DO NOT provide general knowledge, or casual conversation.
+
+Instead reply exactly:
+This is outside the interview process. Please focus on the interview question.
+
+After that, continue the interview from the current question number.
 
 AFTER USER ANSWERS:
 - If correct:

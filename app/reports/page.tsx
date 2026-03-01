@@ -158,11 +158,12 @@ export default function ReportsPage() {
                           </span>{" "}
                           {interview.difficulty}
                         </p>
-                        <p className=" ">
-                          <span className="font-medium text-gray-300">
+                      <p className=" ">
+                          <span className="font-medium text-gray-300 ">
                             Skills:
-                          </span>{" "}
-                          {interview.skills.slice(0, 30)}....
+                            </span>
+                            <span className="line-clamp-1">{interview.skills}</span>
+                          
                         </p>
                         <p>
                           <span className="font-medium text-gray-300">

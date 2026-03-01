@@ -113,8 +113,8 @@ export default function InterviewReport({ report }: { report?: any }) {
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Skills</span>
-                  <span className="font-medium text-slate-200">
+                  <span className="text-slate-400 pr-2">Skills</span>
+                  <span className="font-medium text-slate-200 line-clamp-1">
                     {data.candidateInformation.skillsAssessed}
                   </span>
                 </div>

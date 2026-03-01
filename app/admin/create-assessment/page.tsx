@@ -54,7 +54,7 @@ export default function Page() {
             <h2 className={`text-xl font-semibold ${ACCENT_COLOR}`}>
               Question Management
             </h2>
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-gray-400   text-sm mt-1">
               Add questions manually or upload them in bulk using CSV
             </p>
           </div>

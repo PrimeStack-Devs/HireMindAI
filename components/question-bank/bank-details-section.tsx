@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Controller, UseFormReturn } from 'react-hook-form'
 import * as z from 'zod'
 
-import { Editor } from 'primereact/Editor';
+import { Editor } from 'primereact/editor';
 
 import { useState } from 'react'
 

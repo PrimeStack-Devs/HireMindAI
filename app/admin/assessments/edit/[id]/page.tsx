@@ -77,7 +77,7 @@ export default function EditAssessmentPage() {
 
         {/* Form Card */}
         <motion.div
-          className={`max-w-4xl mx-auto rounded-2xl p-8 md:p-10 shadow-2xl shadow-blue-900/40 backdrop-blur-sm ${ACCENT_BG}`}
+          className={`w-full mx-auto rounded-2xl p-8 md:p-10 shadow-2xl shadow-blue-900/40 backdrop-blur-sm ${ACCENT_BG}`}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.7 }}

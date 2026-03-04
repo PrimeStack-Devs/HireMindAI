@@ -24,10 +24,12 @@ export default function AssessmentDetailPage() {
   const params = useParams();
   const { data, isLoading, error } = useStrapi("assessments", {
     populate: {questions:{populate:"*"}},
-    where:{id:Number(params.id)},
+    where:{documentId:String(params.id)},
   });
+
   
-  // console.log('data:',data?.data[0])
+  
+  console.log('data:',data?.data[0])
    
   const [assessment, setAssessment] = useState<any>(null);
   useEffect(() => {

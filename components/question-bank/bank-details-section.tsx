@@ -28,13 +28,12 @@ export const formSchema = z.object({
 })
 
 export type FormData = z.infer<typeof formSchema>
-
-/* -------------------- Props -------------------- */
+ 
 interface BankDetailsSectionProps {
   form: UseFormReturn<FormData>
 }
 
-/* -------------------- Boolean Toggle -------------------- */
+ 
 function BooleanToggle({
   label,
   value,

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -75,7 +76,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     setMuted((prev) => {
       const next = !prev;
       if (next) {
-       terminateAudio();
+        terminateAudio();
         stop();
         setAiSpeaking(false);
         setIsSpeechLoading(false);
@@ -88,14 +89,14 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
     });
   };
 
-const { sendMessage, isLoading: isChatLoading } = useChat({
-  messages,
-  setMessages,
-  setAiSpeaking,
-  setIsInterviewCompleted,
-  generateSpeech: muted ? async () => { } : generateSpeech,
-  terminateAudio, // ✅ ADD THIS
-});
+  const { sendMessage, isLoading: isChatLoading } = useChat({
+    messages,
+    setMessages,
+    setAiSpeaking,
+    setIsInterviewCompleted,
+    generateSpeech: muted ? async () => { } : generateSpeech,
+    terminateAudio, // ✅ ADD THIS
+  });
 
 
 
@@ -112,6 +113,7 @@ const { sendMessage, isLoading: isChatLoading } = useChat({
     mode: interviewData?.[0]?.mode || "text",
     numOfQuestions: interviewData?.[0]?.numberOfQuestions,
     skills: interviewData?.[0]?.skills || "",
+    jobDesc: interviewData?.[0]?.jobDesc || "",
     username: interviewData?.[0]?.candidateName || "",
   };
 
@@ -131,10 +133,11 @@ const { sendMessage, isLoading: isChatLoading } = useChat({
             : "",
         },
       ];
+      
 
       await sendMessage({ content, interviewDetails });
     } catch (error) {
-      // console.log("Initial greeting failed", error);
+      console.log("Initial greeting failed", error);
     }
   };
 
@@ -316,17 +319,17 @@ const { sendMessage, isLoading: isChatLoading } = useChat({
 
               <InterviewChatPane
                 messages={messages}
-               isSpeechLoading={isChatLoading}
+                isSpeechLoading={isChatLoading}
 
                 setMessages={setMessages}
-                mode={interviewData?.[0]?.mode }
+                mode={interviewData?.[0]?.mode}
               />
             </Card>
 
             <Card className="p-4 flex items-center justify-center">
               {!isInterviewCompleted ? (
                 <InterviewControls
-                  aiSpeaking={ aiSpeaking}
+                  aiSpeaking={aiSpeaking}
                   mode={mode}
                   listening={listening}
                   text={text}

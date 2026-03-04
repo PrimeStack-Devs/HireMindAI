@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://hiremind.io"),
 
   title: {
-    default: "HireMind AI - AI Interview Practice & Mock Interview Platform",
+    default: "AI Mock Interview Practice Platform | HireMind AI",
     template: "%s | HireMind AI",
   },
 
@@ -71,7 +71,9 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/logo/favicon.jpeg",
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
   },
   alternates: {
     canonical: "https://hiremind.io",
@@ -93,7 +95,6 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       
-      <link rel="icon" href="/logo/favicon.jpeg" />
       
       <body className="font-sans relative min-h-screen">
         {/* MediaPipe scripts */}

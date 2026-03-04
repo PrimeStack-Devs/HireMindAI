@@ -14,5 +14,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             url: "https://hiremind.io/dashboard",
             lastModified: new Date(),
         },
+        {
+            url: "https://hiremind.io",
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 1,
+          }
     ];
 }

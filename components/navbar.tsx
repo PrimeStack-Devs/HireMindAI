@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -31,13 +32,14 @@ const Navbar = () => {
           href="/"
           className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity"
         >
-          <div className="flex items-center gap-1 animate-pulse">
+          {/* <div className="flex items-center gap-1 animate-pulse">
             <div className="w-2 h-2 rounded-full bg-white"></div>
             <div className="w-2 h-2 rounded-full bg-white opacity-70"></div>
             <div className="w-2 h-2 rounded-full bg-white opacity-50"></div>
-          </div>
+          </div> */}
+          <Image src="/logo/favicon.jpeg" alt="HireMind AI Logo" width={32} height={32} className="rounded-full animate-pulse" />
           <span className="text-lg font-bold tracking-tight bg-white bg-clip-text text-transparent">
-            HireMind.AI
+            HireMind 
           </span>
         </Link>
 

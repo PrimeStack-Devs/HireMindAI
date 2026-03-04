@@ -246,6 +246,31 @@ export default function HomePage() {
           </Link>
         </section>
       </AnimatedSection>
+      <section className="mx-auto max-w-4xl py-20 text-center text-gray-300">
+        <h2 className="text-3xl font-bold mb-6">
+          AI-Powered Mock Interview Practice Platform
+        </h2>
+
+        <p className="mb-4 text-lg">
+          HireMind is an AI-powered mock interview platform designed to help
+          students, developers, and job seekers prepare for real technical and
+          HR interviews with confidence. Practice interviews with an intelligent
+          AI interviewer that simulates real-world interview scenarios.
+        </p>
+
+        <p className="mb-4 text-lg">
+          Get instant feedback on your answers, communication skills, confidence,
+          and technical understanding. HireMind analyzes your responses and
+          generates detailed performance reports so you can identify weak areas
+          and improve faster.
+        </p>
+
+        <p className="text-lg">
+          Practice for frontend, backend, system design, and HR interviews anytime.
+          Build confidence, improve your interview skills, and get closer to
+          landing your dream job.
+        </p>
+      </section>
     </main>
   );
 }

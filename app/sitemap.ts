@@ -1,24 +1,25 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+    const base = "https://hiremind.io";
     return [
         {
-            url: "https://hiremind.io",
-            lastModified: new Date(),
-        },
-        {
-            url: "https://hiremind.io/create-interview",
-            lastModified: new Date(),
-        },
-        {
-            url: "https://hiremind.io/dashboard",
-            lastModified: new Date(),
-        },
-        {
-            url: "https://hiremind.io",
+            url: base,
             lastModified: new Date(),
             changeFrequency: "weekly",
             priority: 1,
-          }
+        },
+        {
+            url: `${base}/roadmap`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.9,
+        },
+        {
+            url: `${base}/find-job`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.8,
+        }
     ];
 }

@@ -18,10 +18,7 @@ function Page() {
   const [mode, setMode] = useState("Technical");
   const [difficulty, setDifficulty] = useState("medium");
   const [skills, setSkills] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
-  const [focusInputType, setFocusInputType] = useState<
-    "skills" | "jobDescription"
-  >("skills");
+
   const [topic, setTopic] = useState("");
   const [questions, setQuestions] = useState("10");
   const [loadingStage, setLoadingStage] = useState<
@@ -153,14 +150,11 @@ function Page() {
     }
 
     if (step === 3) {
-      if (focusInputType === "skills" && !skills.trim()) {
+      if (!skills.trim()) {
         toast.error("Please provide key skills");
         return false;
       }
-      if (focusInputType === "jobDescription" && !jobDescription.trim()) {
-        toast.error("Please provide job description");
-        return false;
-      }
+
       if (!topic.trim()) {
         toast.error("Please provide job role");
         return false;
@@ -183,24 +177,17 @@ function Page() {
     try {
       setLoadingStage("create");
       const normalizedSkills = skills.trim();
-      const normalizedJobDesc = jobDescription.trim();
 
       if (!candidateName.trim()) return toast.error("Please provide candidate name");
       if (!data?.user) return toast.error("You must be logged in");
-      if (focusInputType === "skills" && !normalizedSkills) return toast.error("Please provide key skills");
-      if (focusInputType === "jobDescription" && !normalizedJobDesc) return toast.error("Please provide job description");
+      if (!normalizedSkills) return toast.error("Please provide key skills");
       if (!topic.trim()) return toast.error("Please provide job role");
 
       const res = await strapi.create("interviews", {
         resume: resumeUrl || null,
         mode,
         difficulty,
-        skills:
-          focusInputType === "skills" && normalizedSkills
-            ? normalizedSkills.split(" ").join(",")
-            : "",
-        jobDesc:
-          focusInputType === "jobDescription" ? normalizedJobDesc : "",
+        skills: normalizedSkills.split(" ").join(","),
         details: topic,
         numberOfQuestions: parseInt(questions),
         user: data?.user?.id,
@@ -363,58 +350,20 @@ function Page() {
                 Step 3: Focus Area 🎯
               </h2>
 
-              <div className="mb-6">
-                <label className={LabelClasses}>Focus Input</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFocusInputType("skills")}
-                    className={`p-3 rounded-lg border transition ${focusInputType === "skills"
-                      ? "bg-sky-500/30 border-sky-300 text-white"
-                      : "bg-white/5 border-white/20 text-white/80"
-                      }`}
-                  >
-                    Key Skills
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFocusInputType("jobDescription")}
-                    className={`p-3 rounded-lg border transition ${focusInputType === "jobDescription"
-                      ? "bg-sky-500/30 border-sky-300 text-white"
-                      : "bg-white/5 border-white/20 text-white/80"
-                      }`}
-                  >
-                    Job Description
-                  </button>
-                </div>
-              </div>
 
               <div className="mb-6">
-                {focusInputType === "skills" ? (
-                  <>
-                    <label className={LabelClasses}>
-                      Key Skills (comma separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={skills}
-                      onChange={(e) => setSkills(e.target.value)}
-                      placeholder="React, Next.js, Tailwind CSS"
-                      className={InputClasses}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <label className={LabelClasses}>Job Description</label>
-                    <textarea
-                      value={jobDescription}
-                      onChange={(e) => setJobDescription(e.target.value)}
-                      placeholder="Paste the job description here..."
-                      rows={6}
-                      className={InputClasses}
-                    />
-                  </>
-                )}
+
+                <label className={LabelClasses}>
+                  Key Skills (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={skills}
+                  onChange={(e) => setSkills(e.target.value)}
+                  placeholder="React, Next.js, Tailwind CSS"
+                  className={InputClasses}
+                />
+
               </div>
 
               <div>

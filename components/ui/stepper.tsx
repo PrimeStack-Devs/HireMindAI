@@ -1,3 +1,4 @@
+
 "use client";
 import React, {
   useState,
@@ -14,6 +15,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   initialStep?: number;
   onStepChange?: (step: number) => void;
   onFinalStepCompleted?: () => void;
+  canProceed?: (currentStep: number) => boolean;
   stepCircleContainerClassName?: string;
   stepContainerClassName?: string;
   contentClassName?: string;
@@ -33,8 +35,9 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
 export default function Stepper({
   children,
   initialStep = 1,
-  onStepChange = () => {},
-  onFinalStepCompleted = () => {},
+  onStepChange = () => { },
+  onFinalStepCompleted = () => { },
+  canProceed = () => true,
   stepCircleContainerClassName = "",
   stepContainerClassName = "",
   contentClassName = "",
@@ -71,6 +74,7 @@ export default function Stepper({
   };
 
   const handleNext = () => {
+    if (!canProceed(currentStep)) return;
     if (!isLastStep) {
       setDirection(1);
       updateStep(currentStep + 1);
@@ -78,6 +82,7 @@ export default function Stepper({
   };
 
   const handleComplete = () => {
+    if (!canProceed(currentStep)) return;
     setDirection(1);
     updateStep(totalSteps + 1);
   };
@@ -139,18 +144,16 @@ export default function Stepper({
         {!isCompleted && (
           <div className={`px-8 pb-8 ${footerClassName}`}>
             <div
-              className={`mt-10 flex ${
-                currentStep !== 1 ? "justify-between" : "justify-end"
-              }`}
+              className={`mt-10 flex ${currentStep !== 1 ? "justify-between" : "justify-end"
+                }`}
             >
               {currentStep !== 1 && (
                 <button
                   onClick={handleBack}
-                  className={`duration-350 rounded px-2 py-1 transition ${
-                    currentStep === 1
-                      ? "pointer-events-none opacity-50 text-neutral-400"
-                      : "text-neutral-400 hover:text-neutral-700"
-                  }`}
+                  className={`duration-350 rounded px-2 py-1 transition ${currentStep === 1
+                    ? "pointer-events-none opacity-50 text-neutral-400"
+                    : "text-neutral-400 hover:text-neutral-700"
+                    }`}
                   {...backButtonProps}
                 >
                   {backButtonText}
@@ -285,8 +288,8 @@ function StepIndicator({
     currentStep === step
       ? "active"
       : currentStep < step
-      ? "inactive"
-      : "complete";
+        ? "inactive"
+        : "complete";
 
   const handleClick = () => {
     if (step !== currentStep && !disableStepIndicators) {
@@ -345,7 +348,7 @@ function StepConnector({ isComplete }: StepConnectorProps) {
   );
 }
 
-interface CheckIconProps extends React.SVGProps<SVGSVGElement> {}
+interface CheckIconProps extends React.SVGProps<SVGSVGElement> { }
 
 function CheckIcon(props: CheckIconProps) {
   return (

@@ -15,8 +15,69 @@ import LayoutShell from "@/components/LayoutShell";
 import 'quill/dist/quill.snow.css'
 
 export const metadata: Metadata = {
-  title: "AI Interviewer - Master Your Next Interview",
-  description: "Practice interviews with AI-powered coaching.",
+  metadataBase: new URL("https://hiremind.io"),
+
+  title: {
+    default: "AI Mock Interview Practice Platform | HireMind AI",
+    template: "%s | HireMind AI",
+  },
+
+  description:
+    "HireMind AI helps you practice real interview questions with an AI interviewer. Get feedback, performance reports, and improve your chances of cracking technical and HR interviews.",
+
+  keywords: [
+    "AI interview practice",
+    "mock interview AI",
+    "AI interviewer",
+    "interview preparation platform",
+    "technical interview practice",
+    "AI interview coach",
+    "hiremind",
+  ],
+
+  authors: [{ name: "HireMind AI" }],
+  creator: "HireMind AI",
+  publisher: "HireMind AI",
+
+  openGraph: {
+    title: "HireMind AI - Practice Interviews with AI",
+    description:
+      "Practice interviews with an AI interviewer, receive feedback reports, and improve your chances of getting hired.",
+    url: "https://hiremind.io",
+    siteName: "HireMind AI",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "HireMind AI Interview Practice",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "HireMind AI - AI Interview Practice",
+    description:
+      "Prepare for interviews with AI-powered mock interviews and feedback reports.",
+    images: ["/og-image.jpg"],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  alternates: {
+    canonical: "https://hiremind.io",
+  },
 };
 
 export default async function RootLayout({
@@ -33,13 +94,33 @@ export default async function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
       suppressHydrationWarning
     >
+      
+      
       <body className="font-sans relative min-h-screen">
         {/* MediaPipe scripts */}
         <Script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" />
         <Script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" />
         <Script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" />
         <Script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" />
-
+        <Script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "HireMind AI",
+              applicationCategory: "EducationalApplication",
+              operatingSystem: "Web",
+              description:
+                "HireMind AI is an AI-powered interview preparation platform that helps candidates practice mock interviews and get real-time feedback.",
+              url: "https://hiremind.io",
+              creator: {
+                "@type": "Organization",
+                name: "HireMind AI",
+              },
+            }),
+          }}
+        />
         <AuthProvider session={session}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Suspense>

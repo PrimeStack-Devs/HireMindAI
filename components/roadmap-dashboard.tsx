@@ -28,6 +28,9 @@ export default function RoadmapDashboard({
   handleDownload: () => void;
   handleGenerateNew: () => void;
 }) {
+
+
+  // console.log('data',data)
   const router = useRouter();
   const [selectedMonth, setSelectedMonth] = useState(1);
 
@@ -126,7 +129,7 @@ export default function RoadmapDashboard({
                   }`}
                 >
                   <div className="font-semibold  mb-2">Month {monthNum}</div>
-                  <div className="text-sm">{monthData.Topics?.[0]}</div>
+                  <div className="text-sm">{monthData.Topics?.[0]?.title || "No topics"}</div>
                 </button>
               );
             })}

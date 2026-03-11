@@ -6,9 +6,12 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import { toast } from "sonner"
+import { useParams } from "next/navigation"
 
-export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  getRoadmap: () => void, formData: any, setFormData: (formData: any) => void} ) {
- 
+export default function RoadmapForm({ getRoadmap, formData, setFormData }: { getRoadmap: () => void, formData: any, setFormData: (formData: any) => void }) {
+
+
+    const params = useParams();
     const durationOptions = [
         { value: 3, label: "3 months" },
         { value: 6, label: "6 months" },
@@ -29,7 +32,7 @@ export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  get
         },
     }
 
- 
+
     const inputVariants = {
         focus: {
             scale: 1.02,
@@ -41,8 +44,8 @@ export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  get
         e.preventDefault()
         if (formData.jobRole.trim() === "" || formData.skills.trim() === "" || formData.duration === 0) {
             toast.error("Please fill all the fields")
-                return;
-        } 
+            return;
+        }
         getRoadmap();
     }
 
@@ -55,28 +58,31 @@ export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  get
             </div>
 
             <motion.div
-                className="relative z-10 w-full max-w-2xl"
+                className="relative z-10 w-full max-w-3xl mx-auto"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
             >
                 {/* Header */}
-                <motion.div  className="mb-12 text-center">
-                    <h1 className="text-5xl font-bold text-white mb-3 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                        Roadmap Generator   
+                <motion.div className="mb-12 text-center mx-auto max-w-xl">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        {params?.type === "simple" ? "Quick Career Roadmap" : "AI Career Roadmap"}
                     </h1>
-                    <p className="text-lg text-slate-400">
-                        Share your job role and skills and let&apos;s generate a roadmap for you
+
+                    <p className="text-base md:text-lg text-slate-400 leading-relaxed">
+                        {params?.type === "simple"
+                            ? "Get a clear and structured learning path based on your role, skills, and timeline to help you move confidently toward your career goal."
+                            : "Receive a personalized AI-powered roadmap that analyzes your skills and builds a smart learning strategy to reach your target role faster."}
                     </p>
                 </motion.div>
 
                 {/* Form Card */}
                 <motion.form
                     onSubmit={handleSubmit}
-                    className="backdrop-blur-xl bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 shadow-2xl"
+                    className="backdrop-blur-xl bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 md:p-10 shadow-2xl"
                 >
                     {/* Job Role Field */}
-                    <motion.div  className="mb-8">
+                    <motion.div className="mb-8">
                         <label className="block text-sm font-semibold text-slate-200 mb-3">Job Role</label>
                         <motion.input
                             type="text"
@@ -91,8 +97,8 @@ export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  get
                     </motion.div>
 
                     {/* Skills Field */}
-                    <motion.div  className="mb-8">
-                        <label className="block text-sm font-semibold text-slate-200 mb-3">Skills</label>
+                    <motion.div className="mb-8">
+                        <label className="block text-sm font-semibold text-slate-200 mb-3">{params.type === "simple" ? "Skills" : "Your Skills"}</label>
                         <motion.textarea
                             value={formData.skills}
                             onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
@@ -106,7 +112,7 @@ export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  get
                     </motion.div>
 
                     {/* Duration Dropdown */}
-                    <motion.div  className="mb-8">
+                    <motion.div className="mb-8">
                         <label className="block text-sm font-semibold text-slate-200 mb-3">Duration</label>
                         <div className="relative">
                             <motion.button
@@ -138,8 +144,8 @@ export default function RoadmapForm( {getRoadmap, formData, setFormData}: {  get
                                             setIsDropdownOpen(false)
                                         }}
                                         className={`w-full px-4 py-3 text-left transition-colors duration-200 ${formData.duration === option.value
-                                                ? "bg-blue-500/30 text-blue-300"
-                                                : "text-slate-300 hover:bg-slate-600/50"
+                                            ? "bg-blue-500/30 text-blue-300"
+                                            : "text-slate-300 hover:bg-slate-600/50"
                                             }`}
                                         whileHover={{ paddingLeft: "1.25rem" }}
                                     >

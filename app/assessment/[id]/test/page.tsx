@@ -42,7 +42,7 @@ export default function TestPage() {
     'assessment-schedules',
     query
   )
-  console.log("data", data)
+  // console.log("data", data)
   const dbQuestions =
     (data?.data?.[0] as any)?.assessment?.questions ?? []
 

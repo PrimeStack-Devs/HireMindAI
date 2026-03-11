@@ -1,4 +1,4 @@
- "use client"
+"use client"
 
 interface MonthCardProps {
   month: number
@@ -36,13 +36,30 @@ export default function MonthCard({ month, data }: MonthCardProps) {
         <div>
           <p className="text-muted-foreground text-sm uppercase tracking-wider mb-4">Topics to Cover</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {data.Topics.map((topic, idx) => (
+            {data?.Topics?.map((topic: any, idx: number) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-4 bg-background bg-opacity-50 border border-border border-opacity-30 rounded-lg hover:border-opacity-100 transition-all"
+                className="p-4 bg-background bg-opacity-50 border border-border border-opacity-30 rounded-lg hover:border-opacity-100 transition-all"
               >
-                <div className="w-2 h-2 mt-2 rounded-full bg-accent flex-shrink-0"></div>
-                <span className="text-foreground font-medium">{topic}</span>
+                {/* Title */}
+                <div className="flex items-start gap-3 mb-2">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-accent flex-shrink-0"></div>
+                  <span className="text-foreground font-semibold">
+                    {topic.title}
+                  </span>
+                </div>
+
+                {/* Points */}
+                <ul className="ml-5 space-y-1 list-disc">
+                  {topic.points?.map((point: string, i: number) => (
+                    <li
+                      key={i}
+                      className="text-sm text-muted-foreground"
+                    >
+                      {point}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
@@ -52,7 +69,7 @@ export default function MonthCard({ month, data }: MonthCardProps) {
         <div>
           <p className="text-muted-foreground text-sm uppercase tracking-wider mb-4">Learning Resources</p>
           <div className="space-y-2">
-            {data.Resources.map((resource, idx) => (
+            {data?.Resources?.map((resource, idx) => (
               <div key={idx} className="flex items-start gap-3 p-3 bg-background bg-opacity-30 rounded-lg">
                 <div className="w-1.5 h-1.5 mt-2 rounded-full bg-gray-300 flex-shrink-0"></div>
                 <span className="text-gray-300 text-sm">{resource}</span>
@@ -65,7 +82,7 @@ export default function MonthCard({ month, data }: MonthCardProps) {
         <div>
           <p className="text-muted-foreground text-sm uppercase tracking-wider mb-4">Practical Tasks</p>
           <div className="space-y-2">
-            {data.Tasks.map((task, idx) => (
+            {data?.Tasks?.map((task, idx) => (
               <div
                 key={idx}
                 className="flex items-start gap-3 p-3 bg-primary bg-opacity-10 border border-primary border-opacity-20 rounded-lg"

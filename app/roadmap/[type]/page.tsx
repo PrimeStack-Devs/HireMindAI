@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import TrueFocus from "@/components/TrueFocus";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const page = () => {
   const [loading, setLoading] = useState(false);
@@ -19,32 +19,58 @@ const page = () => {
     skills: "",
     duration: 6,
   });
+  const params = useParams();
+
+  // console.log('params',params.type)
 
   const getRoadmap = async () => {
     try {
-      setLoading(true);
-      setGenerateRoadmap(true);
-      const res = await fetch("/api/interview/roadmap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roadmapDetails: {
-            jobRole: formData.jobRole,
-            skills: formData.skills,
-            duration: formData.duration,
-          },
-        }),
-      });
-      const data = await res.json();
-      const cleaned = data.roadmap
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
+      if (params.type == "simple") {
+        setLoading(true);
+        setGenerateRoadmap(true);
+        const res = await fetch("/api/interview/roadmap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
 
-      // Convert to object
-      //  console.log(JSON.parse(cleaned));
-      setRoadmap(JSON.parse(cleaned));
-      window.localStorage.setItem("roadmap", cleaned);
+            roadmapDetails: {
+              jobRole: formData.jobRole,
+              skills: formData.skills,
+              duration: formData.duration,
+            },
+          }),
+        });
+        const data = await res.json();
+        setRoadmap(data.roadmap);
+        window.localStorage.setItem("roadmap", JSON.stringify(data.roadmap));
+      }
+      if (params.type == "smart") {
+        setLoading(true);
+        setGenerateRoadmap(true);
+        const res = await fetch("/api/interview/roadmap/generate-test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roadmapDetails: {
+              jobRole: formData.jobRole,
+              skills: formData.skills,
+              duration: formData.duration,
+            },
+          }),
+        });
+        const data = await res.json();
+
+
+        //  console.log('data',data)
+
+
+
+        localStorage.setItem("smartTest", JSON.stringify(data));
+        localStorage.setItem("roadmapDetails", JSON.stringify(formData));
+
+
+        router.push("/roadmap/test");
+      }
     } catch (error) {
       setError(error);
       setGenerateRoadmap(false);
@@ -159,6 +185,8 @@ const page = () => {
 
     doc.save("roadmap.pdf");
   };
+
+  // console.log('obj',)
   const handleGenerateNew = () => {
     setGenerateRoadmap(false);
     setRoadmap(null);
@@ -172,8 +200,10 @@ const page = () => {
   useEffect(() => {
     const roadmap = window.localStorage.getItem("roadmap");
     if (roadmap) {
+      // console.log(roadmap)
       setRoadmap(JSON.parse(roadmap));
       setGenerateRoadmap(true);
+      // console.log('roadmap', roadmap)
     }
   }, []);
 

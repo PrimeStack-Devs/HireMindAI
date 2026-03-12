@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Eye, MapPin, MessageSquare, BriefcaseBusiness } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { RoadmapOption } from "@/components/roadmap/roadmapOption";
 
 const page = () => {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [roadmap, setRoadmap] = useState<string | null>(null);
-  const [roadmapClicked, setRoadmapClicked] = useState(false)
-
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     const item = window.localStorage.getItem("roadmap");
     setRoadmap(item);
@@ -155,14 +155,10 @@ const page = () => {
                             ""
                           )}
                           <Button
-                            className={`${roadmapClicked ? "cursor-not-allowed" : "cursor-pointer"}`}
-                            onClick={() => {
-                              window.localStorage.removeItem("roadmap");
-                              router.push("/roadmap");
-                              setRoadmapClicked(true);
-                            }}
+                            className="cursor-pointer"
+                            onClick={() => setOpen(true)}
                           >
-                            Generate New
+                            Generate Roadmap
                           </Button>
                         </div>
                       ) : card.id == "job" ? (
@@ -208,9 +204,15 @@ const page = () => {
             Hover over the cards to see more details
           </p>
         </div>
+        <RoadmapOption
+          open={open}
+          onClose={() => setOpen(false)}
+        />
       </div>
     </main>
   );
 };
 
 export default page;
+
+

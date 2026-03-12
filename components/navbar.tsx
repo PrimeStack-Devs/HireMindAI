@@ -3,12 +3,15 @@
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import StartInterviewModal from "@/components/modals/startInterview";
 
 const Navbar = () => {
   const { data: session } = useSession() as any;
   const pathname = usePathname();
+  const router = useRouter();
+  const [isStartInterviewModalOpen, setIsStartInterviewModalOpen] = useState(false);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -70,15 +73,16 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           {session?.user?.id ? (
             <>
-              <Link
-                href="/create-interview"
+              <button
+                type="button"
+                onClick={() => setIsStartInterviewModalOpen(true)}
                 className="rounded-lg px-4 py-2 text-xs font-semibold 
                 text-white bg-gradient-to-r from-blue-600 to-blue-500 
                 hover:from-blue-500 hover:to-blue-400 transition-all shadow-lg shadow-blue-600/20 
                 hover:shadow-blue-400/40 duration-300"
               >
                 Start Interview
-              </Link>
+              </button>
 
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
@@ -107,6 +111,18 @@ const Navbar = () => {
           )}
         </div>
       </div>
+      <StartInterviewModal
+        isOpen={isStartInterviewModalOpen}
+        onClose={() => setIsStartInterviewModalOpen(false)}
+        onStartBasic={() => {
+          setIsStartInterviewModalOpen(false);
+          router.push("/create-interview?type=basic");
+        }}
+        onStartAdvanced={() => {
+          setIsStartInterviewModalOpen(false);
+          router.push("/create-interview?type=advanced");
+        }}
+      />
     </nav>
   );
 };

@@ -5,6 +5,10 @@ import { motion } from "framer-motion";
 import Hero from "@/components/hero";
 import AnimatedSection from "@/components/animated-section";
 import NumberTicker from "@/components/number-ticker";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import StartInterviewModal from "@/components/modals/startInterview";
+import { useRouter } from "next/navigation";
 
 // --- DARK BLUE THEME WITH SHINY GRADIENTS AND SOLID BUTTONS CONSTANTS ---
 // Main CTA button: a strong, solid blue background with white text
@@ -18,6 +22,9 @@ const ACCENT_COLOR = "text-sky-400"; // Accent color: a vibrant, electric blue
 const ACCENT_BG = "bg-gradient-to-br from-blue-950/70 to-blue-900/50"; // Card background
 
 export default function HomePage() {
+
+  const router = useRouter();
+  const [isStartInterviewModalOpen, setIsStartInterviewModalOpen] = useState(false);
   return (
     <main className="min-h-screen  text-white">
       <div className="h-10" aria-hidden />
@@ -32,13 +39,21 @@ export default function HomePage() {
           transition={{ delay: 0.4, duration: 0.8 }}
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link
+            {/* <Link
               href="/create-interview"
               // Primary button with solid blue color and hover effect
               className={`rounded-lg ${PRIMARY_BUTTON_BG} ${PRIMARY_BUTTON_TEXT} px-8 py-3 text-sm font-bold shadow-lg shadow-blue-500/30 ${PRIMARY_BUTTON_HOVER_BG} transition-all duration-300 transform hover:-translate-y-1`}
             >
               Start Practicing ↗
-            </Link>
+            </Link> */}
+            <Button
+
+              onClick={() => setIsStartInterviewModalOpen(true)}
+              // Primary button with solid blue color and hover effect
+              className={`rounded-lg ${PRIMARY_BUTTON_BG} ${PRIMARY_BUTTON_TEXT} px-8 py-3 text-sm font-bold shadow-lg shadow-blue-500/30 ${PRIMARY_BUTTON_HOVER_BG} transition-all duration-300 transform hover:-translate-y-1`}
+            >
+              Start Practicing ↗
+            </Button>
             <Link
               href="/roadmap-chat"
               // Secondary button with solid border and subtle hover
@@ -271,6 +286,18 @@ export default function HomePage() {
           landing your dream job.
         </p>
       </section>
+      <StartInterviewModal
+        isOpen={isStartInterviewModalOpen}
+        onClose={() => setIsStartInterviewModalOpen(false)}
+        onStartBasic={() => {
+          setIsStartInterviewModalOpen(false);
+          router.push("/create-interview?type=basic");
+        }}
+        onStartAdvanced={() => {
+          setIsStartInterviewModalOpen(false);
+          router.push("/create-interview?type=advanced");
+        }}
+      />
     </main>
   );
 }

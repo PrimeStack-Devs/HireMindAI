@@ -18,6 +18,67 @@ import { useElevenLabsTTS } from "./useElevenLabsTTS";
 
 type Message = { role: "assistant" | "user"; content: string };
 
+type BasicInterviewDetails = {
+  interviewType: "basic";
+  topic: string;
+  difficulty: string;
+  mode: string;
+  numOfQuestions: number;
+  skills: string;
+  jobDesc: string;
+  username: string;
+};
+
+type AdvancedInterviewConfig = {
+  jobRole: string;
+  seniority: string;
+  yearsExperience: string;
+  interviewObjective: string;
+  roundType: string;
+  answerStyle: string;
+  durationMinutes: string;
+  jobDescription: string;
+  candidateBackground: string;
+  companyContext: string;
+  mustCoverTopics: string;
+  avoidTopics: string;
+  evaluationFocus: string;
+  scoringRubric: string;
+  redFlags: string;
+  followUpDepth: string;
+  strictness: string;
+  interviewerPersona: string;
+  conversationTone: string;
+  language: string;
+  industryDomain: string;
+};
+
+type AdvancedInterviewDetails = {
+  interviewType: "advanced";
+  topic: string;
+  difficulty: string;
+  mode: string;
+  numOfQuestions: number;
+  skills: string;
+  jobDesc: string;
+  username: string;
+} & AdvancedInterviewConfig;
+
+function parseAdvancedConfig(rawJobDesc: string | undefined) {
+  if (!rawJobDesc?.startsWith("__ADVANCED_CONFIG__")) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(
+      rawJobDesc.replace("__ADVANCED_CONFIG__", "")
+    ) as AdvancedInterviewConfig;
+  } catch (error) {
+    console.error("Failed to parse advanced interview config", error);
+    return null;
+  }
+}
+
 export default function InterviewPage({ params }: { params: { id: string } }) {
   const tabViolationCountRef = useRef(0);
 
@@ -106,18 +167,34 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   });
 
   const interviewData: any = data?.data;
+  const currentInterview = interviewData?.[0];
+  const advancedConfig = parseAdvancedConfig(currentInterview?.jobDesc);
 
-  const interviewDetails = {
-    topic: interviewData?.[0]?.details || "",
-    difficulty: interviewData?.[0]?.difficulty || "medium",
-    mode: interviewData?.[0]?.mode || "text",
-    numOfQuestions: interviewData?.[0]?.numberOfQuestions,
-    skills: interviewData?.[0]?.skills || "",
-    jobDesc: interviewData?.[0]?.jobDesc || "",
-    username: interviewData?.[0]?.candidateName || "",
-  };
+  const interviewDetails: BasicInterviewDetails | AdvancedInterviewDetails =
+    advancedConfig
+      ? {
+          interviewType: "advanced",
+          topic: currentInterview?.details || advancedConfig.jobRole || "",
+          difficulty: currentInterview?.difficulty || "medium",
+          mode: currentInterview?.mode || "text",
+          numOfQuestions: currentInterview?.numberOfQuestions || 10,
+          skills: currentInterview?.skills || advancedConfig.mustCoverTopics || "",
+          jobDesc: advancedConfig.jobDescription || "",
+          username: currentInterview?.candidateName || "",
+          ...advancedConfig,
+        }
+      : {
+          interviewType: "basic",
+          topic: currentInterview?.details || "",
+          difficulty: currentInterview?.difficulty || "medium",
+          mode: currentInterview?.mode || "text",
+          numOfQuestions: currentInterview?.numberOfQuestions || 10,
+          skills: currentInterview?.skills || "",
+          jobDesc: currentInterview?.jobDesc || "",
+          username: currentInterview?.candidateName || "",
+        };
 
-  const resumeUrl = interviewData?.[0]?.resume || "";
+  const resumeUrl = currentInterview?.resume || "";
 
   // Initial greeting
   const initialGreetings = async () => {
@@ -152,9 +229,9 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
         if (tabViolationCountRef.current === 1) {
           toast.error("Do not switch tabs during the interview.");
         } else {
-          handleInterviewTermination(
-            "Interview terminated due to tab switching."
-          );
+          // handleInterviewTermination(
+          //   "Interview terminated due to tab switching."
+          // );
         }
       }
     };
@@ -322,7 +399,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
                 isSpeechLoading={isChatLoading}
 
                 setMessages={setMessages}
-                mode={interviewData?.[0]?.mode}
+                mode={currentInterview?.mode}
               />
             </Card>
 

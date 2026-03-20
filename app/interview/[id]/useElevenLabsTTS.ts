@@ -81,7 +81,10 @@ export function useElevenLabsTTS({
                     const response = await fetch("/api/tts", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ text }),
+                        body: JSON.stringify({
+                            text,
+                            voiceType:"female",
+                        }),
                     });
 
                     if (!response.ok || !response.body) {

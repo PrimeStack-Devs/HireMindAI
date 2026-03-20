@@ -13,7 +13,7 @@ const VOICES = {
 };
 export async function POST(req: Request) {
     try {
-        const { text, voiceType = "male" } = await req.json();
+        const { text, voiceType = "female" } = await req.json();
 
 
         if (!text) {
@@ -29,17 +29,19 @@ export async function POST(req: Request) {
         const voiceSettings =
             voiceType === "male"
                 ? {
-                    stability: 0.85,
+                    stability: 0.8,
                     similarity_boost: 0.9,
                     style: 0.25,
                     use_speaker_boost: true,
+                    speaking_rate: 1.1,
                 }
                 : {
-                    stability: 0.75,
+                    stability: 0.7,
                     similarity_boost: 0.9,
                     style: 0.35,
                     use_speaker_boost: true,
-                };
+                    speaking_rate: 1.15,
+            };
 
         // const elevenRes = await fetch(
         //     `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream`,

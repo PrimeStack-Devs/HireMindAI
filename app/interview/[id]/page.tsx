@@ -229,9 +229,9 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
         if (tabViolationCountRef.current === 1) {
           toast.error("Do not switch tabs during the interview.");
         } else {
-          // handleInterviewTermination(
-          //   "Interview terminated due to tab switching."
-          // );
+          handleInterviewTermination(
+            "Interview terminated due to tab switching."
+          );
         }
       }
     };

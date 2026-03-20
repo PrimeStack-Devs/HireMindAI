@@ -13,7 +13,7 @@ const VOICES = {
 };
 export async function POST(req: Request) {
     try {
-        const { text, voiceType = "female" } = await req.json();
+        const { text, voiceType = "male" } = await req.json();
 
 
         if (!text) {

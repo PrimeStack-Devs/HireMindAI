@@ -61,7 +61,7 @@ export default function StartInterviewModal({
           role="dialog"
           aria-modal="true"
           aria-labelledby="start-interview-title"
-          className={`relative w-full max-w-4xl rounded-2xl border border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-blue-950/85 p-5 text-white shadow-2xl shadow-black/50 transition-all duration-300 sm:p-7 ${isOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-3 scale-[0.98] opacity-0"
+          className={`relative w-full max-w-4xl rounded-2xl border border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-blue-950/85 p-5 text-white shadow-2xl shadow-black/50 backdrop-blur-xs transition-all duration-300 sm:p-7 ${isOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-3 scale-[0.98] opacity-0"
             }`}
         >
           <button

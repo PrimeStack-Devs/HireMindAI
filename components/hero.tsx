@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
 export default function Hero() {
-  const fullText = "The fastest and most powerful platform for mastering interviews with AI" // Updated to match OpenAI style
+  const fullText =
+    "HireMind helps you master interviews with AI-powered mock practice"
   const [typed, setTyped] = useState("")
 
   useEffect(() => {
@@ -36,8 +37,8 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.8 }}
       >
-        Practice transformative interview experiences powered by industry-leading AI models and tools.{" "}
-        {/* Updated copy to match OpenAI style */}
+        HireMind AI gives job seekers realistic interview practice, instant
+        feedback, and performance reports for technical and HR rounds.
       </motion.p>
     </div>
   )

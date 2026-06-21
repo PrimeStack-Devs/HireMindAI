@@ -23,18 +23,17 @@ HireMindAI automates the interview lifecycle by offering role-based mock intervi
 ---
 
 ## 🛠️ Tech Stack
-
 ### Frontend
 * **Framework:** Next.js (React) with TypeScript
-* **Styling:** Tailwind CSS + Shadcn/ui Components
-* **State Management & Hooks:** React Hooks & Context API
-* **Authentication:** NextAuth.js / Middleware
-* **AI & Media Interactivity:** OpenRouter (LLM routing), ElevenLabs (Voice), MediaPipe Facemesh (Face Tracking)
+* **Styling:** Tailwind CSS + Radix UI Components
+* **State Management:** React Hooks & Context API
+* **Authentication:** NextAuth.js (Integrated with Strapi Backend)
+* **AI & Media Interactivity:** OpenRouter (GPT-4o-mini), ElevenLabs (Voice Synthesis), MediaPipe Face Mesh (Face Tracking)
 
 ### Backend Services
-* **CMS & Content Engine:** Strapi CMS
-* **Primary Stack:** Node.js / Express.js
-* **Database & ORMs:** PostgreSQL / Prisma
+* **Core Engine & CMS:** Strapi CMS (Node.js)
+* **Database:** PostgreSQL  
+* **ORM/Query Builder:** Strapi ORM (built-in)
 
 ---
  

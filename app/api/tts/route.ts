@@ -5,11 +5,12 @@ const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY!;
 // const VOICE_ID = "Di8BzFfYtEOQXwj585cY";//vanshul - long form conversation host
 // const VOICE_ID = "Di8BzFfYtEOQXwj585cY";//vanshul - long form conversation host
 // const VOICE_ID = "gHu9GtaHOXcSqFTK06ux";//anjali - warm cheerful and calm
-const VOICE_ID = "Uyx98Ek4uMNmWN7E28CD";//aryan akash -  calm and professional
+// const VOICE_ID = "Uyx98Ek4uMNmWN7E28CD";//aryan akash -  calm and professional
+const VOICE_ID = "qSeXEcewz7tA0Q0qk9fH";//aryan akash -  calm and professional
 
 const VOICES = {
-    female: "gHu9GtaHOXcSqFTK06ux", // Anjali (HR style)
-    male: "Uyx98Ek4uMNmWN7E28CD",   // Aakash Aryan (strict interviewer)
+  female: "EXAVITQu4vr4xnSDxMaL", // Sarah
+  male: "CwhRBWXzGAHq8TQ4Fs17",   // Roger
 };
 export async function POST(req: Request) {
     try {

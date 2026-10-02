@@ -9,7 +9,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStrapi } from "@/lib/api/useStrapi";
 import { useChat } from "./useChat";
-import { useMurfTTS } from "./useMurfTTS";
 import toast from "react-hot-toast";
 import { strapi } from "@/lib/api/sdk";
 import { useRouter, usePathname } from "next/navigation";
@@ -102,50 +101,30 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   const pathname = usePathname();
 
 
-  const { generateSpeech, terminateAudio } = useElevenLabsTTS({
+  const { generateSpeech, terminateAudio, primeAudio } = useElevenLabsTTS({
     onStart: () => setAiSpeaking(true),
     onEnd: () => setAiSpeaking(false),
   });
 
-  const {
-    // generateSpeech,
-    stop,
-    unlockPlayback,
-    isPlaying,
-    setIsLoading: setIsSpeechLoading,
-    isLoading: isSpeechLoading,
-  } = useMurfTTS({ voiceId: "en-US-natalie" });
-
-  // ✅ FIX: stop audio on route change
+  // Stop audio on route change
   useEffect(() => {
-    stop();
-    setAiSpeaking(false);
-    setIsSpeechLoading(false);
-  }, [pathname]);
+    terminateAudio();
+  }, [pathname, terminateAudio]);
 
-  // ✅ FIX: stop audio when page unmounts
+  // Stop audio when page unmounts
   useEffect(() => {
     return () => {
-      stop();
-      setAiSpeaking(false);
-      setIsSpeechLoading(false);
+      terminateAudio();
     };
-  }, []);
+  }, [terminateAudio]);
 
-  // ✅ Toggle mute handler
+  // Toggle mute handler
   const toggleMute = () => {
     setMuted((prev) => {
       const next = !prev;
       if (next) {
         terminateAudio();
-        stop();
-        setAiSpeaking(false);
-        setIsSpeechLoading(false);
-      } else {
-        // Unmuting => unlock playback again
-        unlockPlayback();
       }
-
       return next;
     });
   };
@@ -244,7 +223,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
   }, [showStartModal, isInterviewCompleted]);
 
   const startInterview = () => {
-    unlockPlayback();
+    primeAudio();
     initialGreetings();
     setShowStartModal(false);
 
@@ -266,10 +245,6 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
 
     setIsInterviewCompleted(true);
     setShowStartModal(false);
-
-    stop();
-    setAiSpeaking(false);
-    setIsSpeechLoading(false);
 
     if (stopAnalyticts && typeof stopAnalyticts === "function") {
       try {
@@ -407,6 +382,7 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
               {!isInterviewCompleted ? (
                 <InterviewControls
                   aiSpeaking={aiSpeaking}
+                  isChatLoading={isChatLoading}
                   mode={mode}
                   listening={listening}
                   text={text}
@@ -416,9 +392,6 @@ export default function InterviewPage({ params }: { params: { id: string } }) {
                   terminateAudio={terminateAudio}
                   handleSend={async (c) => {
                     await sendMessage({ content: c, interviewDetails });
-
-                    // if (!muted) setIsSpeechLoading(true);
-
                     setText("");
                   }}
                 />

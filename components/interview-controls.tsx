@@ -7,6 +7,7 @@ import { Mic, MicOff, SendHorizonal, X } from "lucide-react";
 
 export default function InterviewControls({
   aiSpeaking,
+  isChatLoading = false,
   mode,
   listening,
   text,
@@ -17,6 +18,7 @@ export default function InterviewControls({
   terminateAudio,
 }: {
   aiSpeaking: boolean;
+  isChatLoading?: boolean;
   mode: "voice" | "text";
   listening: boolean;
   text: string;
@@ -56,9 +58,9 @@ export default function InterviewControls({
     textRef.current = text;
   }, [text]);
 
-  // When in voice mode, automatically turn on mic once AI finishes speaking
+  // When in voice mode, automatically turn on mic once AI finishes speaking and thinking
   useEffect(() => {
-    if (aiSpeaking) {
+    if (aiSpeaking || isChatLoading) {
       setListening(false);
     } else if (mode === "voice") {
       const timer = setTimeout(() => {
@@ -66,7 +68,7 @@ export default function InterviewControls({
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [aiSpeaking, mode, setListening]);
+  }, [aiSpeaking, isChatLoading, mode, setListening]);
 
   // Initialize SpeechRecognition once
   useEffect(() => {
@@ -207,13 +209,14 @@ export default function InterviewControls({
   };
 
   const submitAnswer = useCallback(() => {
+    if (isChatLoading) return;
     const trimmed = textRef.current.trim();
     if (!trimmed) return;
     terminateAudio();
     setListening(false);
     handleSend(trimmed);
     handleClear();
-  }, [handleSend, setListening, terminateAudio]);
+  }, [handleSend, setListening, terminateAudio, isChatLoading]);
 
   return (
     <div className="w-full p-2">
@@ -226,6 +229,15 @@ export default function InterviewControls({
             </span>
           </div>
           <AISpeakingBars />
+        </div>
+      ) : isChatLoading ? (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-muted">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-full bg-muted-foreground animate-pulse" />
+            <span className="text-sm text-muted-foreground animate-pulse">
+              AI is thinking...
+            </span>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
@@ -336,10 +348,10 @@ export default function InterviewControls({
             {/* Send button */}
             <button
               type="button"
-              disabled={!text?.trim()}
+              disabled={!text?.trim() || isChatLoading}
               onClick={submitAnswer}
               className={`h-10 w-10 flex items-center justify-center rounded-md border transition ${
-                text?.trim()
+                text?.trim() && !isChatLoading
                   ? "bg-primary text-primary-foreground border-primary hover:opacity-90"
                   : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-border"
               }`}

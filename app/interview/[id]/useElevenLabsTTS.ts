@@ -11,6 +11,7 @@ export function useElevenLabsTTS({
 } = {}) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const mediaSourceRef = useRef<MediaSource | null>(null);
+    const objectUrlRef = useRef<string | null>(null);
 
     // Logical cancellation (prevents race conditions)
     const requestIdRef = useRef(0);
@@ -24,11 +25,20 @@ export function useElevenLabsTTS({
         isCancelledRef.current = true;
 
         if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-            audioRef.current.src = "";
-            audioRef.current.load();
+            try {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+                audioRef.current.src = "";
+                audioRef.current.load();
+            } catch { }
             audioRef.current = null;
+        }
+
+        if (objectUrlRef.current) {
+            try {
+                URL.revokeObjectURL(objectUrlRef.current);
+            } catch { }
+            objectUrlRef.current = null;
         }
 
         if (mediaSourceRef.current) {
@@ -42,6 +52,17 @@ export function useElevenLabsTTS({
 
         onEnd?.();
     }, [onEnd]);
+
+    const primeAudio = useCallback(() => {
+        try {
+            const AudioContextClass =
+                window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioContextClass) {
+                const ctx = new AudioContextClass();
+                ctx.resume().then(() => ctx.close()).catch(() => { });
+            }
+        } catch { }
+    }, []);
 
     const generateSpeech = useCallback(
         async (text: string) => {
@@ -61,9 +82,17 @@ export function useElevenLabsTTS({
 
             const audio = new Audio();
             audioRef.current = audio;
-            audio.src = URL.createObjectURL(mediaSource);
+            const audioSrc = URL.createObjectURL(mediaSource);
+            objectUrlRef.current = audioSrc;
+            audio.src = audioSrc;
 
             audio.onended = () => {
+                if (myReqId === requestIdRef.current) {
+                    onEnd?.();
+                }
+            };
+
+            audio.onerror = () => {
                 if (myReqId === requestIdRef.current) {
                     onEnd?.();
                 }
@@ -83,7 +112,7 @@ export function useElevenLabsTTS({
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             text,
-                            voiceType:"female",
+                            voiceType: "female",
                         }),
                     });
 
@@ -121,7 +150,15 @@ export function useElevenLabsTTS({
                         // 🔥 Start audio ASAP after first chunk
                         if (!hasStartedPlaying) {
                             hasStartedPlaying = true;
-                            await audio.play(); // must be user-initiated upstream
+                            try {
+                                await audio.play();
+                            } catch (playErr) {
+                                console.error("Audio playback error:", playErr);
+                                if (myReqId === requestIdRef.current) {
+                                    onEnd?.();
+                                }
+                                break;
+                            }
                         }
                     }
 
@@ -130,7 +167,18 @@ export function useElevenLabsTTS({
                         myReqId === requestIdRef.current &&
                         mediaSource.readyState === "open"
                     ) {
-                        mediaSource.endOfStream();
+                        if (sourceBuffer.updating) {
+                            await new Promise<void>((resolve) => {
+                                const onUpdateEnd = () => {
+                                    sourceBuffer.removeEventListener("updateend", onUpdateEnd);
+                                    resolve();
+                                };
+                                sourceBuffer.addEventListener("updateend", onUpdateEnd);
+                            });
+                        }
+                        if (mediaSource.readyState === "open") {
+                            mediaSource.endOfStream();
+                        }
                     }
                 } catch (err) {
                     console.error("TTS streaming error:", err);
@@ -146,5 +194,6 @@ export function useElevenLabsTTS({
     return {
         generateSpeech,
         terminateAudio,
+        primeAudio,
     };
 }

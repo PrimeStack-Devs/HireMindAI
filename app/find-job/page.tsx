@@ -253,7 +253,7 @@ export default function JobSearchPage() {
  
   const [jobRole, setJobRole] = useState("");
   const [skills, setSkills] = useState("");
-  // const [location, setLocation] = useState("");
+  const [location, setLocation] = useState("");
   // const [distance, setDistance] = useState(25);
   const [country, setCountry] = useState("in");
   const [jobType, setJobType] = useState("full_time");
@@ -304,7 +304,7 @@ export default function JobSearchPage() {
     candidateDetails: {
       jobRole: formattedQuery, // ✅ already formatted
       skills: [], // optional: we can leave empty since API now gets formatted jobRole
-      // location,
+      location,
       // distance,
       country,
       jobType,
@@ -389,7 +389,7 @@ export default function JobSearchPage() {
               </div>
 
               {/* Location */}
-              {/* <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Location
                 </label>
@@ -399,7 +399,7 @@ export default function JobSearchPage() {
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full rounded-lg border border-blue-700/40 bg-blue-950/40 px-4 py-3 text-sm text-white"
                 />
-              </div> */}
+              </div> 
 
               {/* Distance */}
               {/* <div>

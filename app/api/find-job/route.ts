@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const {
       jobRole,
       skills = [],
-      // location,
+      location,
       distance=100,
       country,
       page = 1,
@@ -123,8 +123,8 @@ export async function POST(req: NextRequest) {
     });
 
     
-    // if (location) {
-    //   params.append("where", location);
+    if (location) {
+      params.append("where", location);}
 
       
       if (distance &&resolvedCountry !== "in") {

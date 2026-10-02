@@ -23,22 +23,6 @@ Return ONLY valid JSON. No markdown. No extra text.
     const API_URI = "https://text.pollinations.ai/openai";
 
 
-//     const response = await fetch(API_URI, {
-//       method: "POST",
-//       headers: {
-//         Authorization: `Bearer ${process.env.AI_API_TOKEN_POLLINATIONS}`,
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         model,
-//         messages: [{ role: "system", content: systemPrompt }, ...messages],
-//       }),
-//     });
-
-//     const data = await response.json();
-// // console.log("Pollinations Raw Response:", data);
-//     let content = data?.choices?.[0]?.message?.content?.trim() || "";
-
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
